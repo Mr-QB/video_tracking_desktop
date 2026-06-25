@@ -2,102 +2,83 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame
 from PySide6.QtCore import Qt
 
 class MetricCard(QWidget):
-    def __init__(self, title, val_before, val_after, delta_text, is_positive_delta=True, is_neutral=False, parent=None):
+    """
+    Individual Metric Tile
+    """
+    def __init__(self, label, value, delta_text, is_positive=True, is_neutral=False, parent=None):
         super().__init__(parent)
-        # Removed .Card class from individual metric
-        
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(10, 10, 10, 10)
-        layout.setSpacing(6)
+        layout.setContentsMargins(8, 4, 8, 4)
+        layout.setSpacing(4)
         
-        # Title
-        title_lbl = QLabel(title)
-        title_lbl.setStyleSheet("color: #1D232B; font-size: 13px; font-weight: bold;")
-        title_lbl.setAlignment(Qt.AlignCenter)
+        # Label
+        lbl = QLabel(label)
+        lbl.setStyleSheet("color: #6B7280; font-size: 11px; font-weight: 600;")
+        lbl.setAlignment(Qt.AlignCenter)
         
-        # Values
-        val_layout = QHBoxLayout()
-        val_layout.setAlignment(Qt.AlignCenter)
-        val_layout.setSpacing(4)
-        
-        if val_before is not None:
-            val_lbl = QLabel(f"{val_before} \u2192 {val_after}") # right arrow
-        else:
-            val_lbl = QLabel(f"{val_after}")
-            
+        # Value
+        val_lbl = QLabel(value)
         val_lbl.setProperty("class", "MetricValue")
         val_lbl.setAlignment(Qt.AlignCenter)
-        val_layout.addWidget(val_lbl)
         
         # Delta
-        delta_lbl = QLabel(delta_text)
-        delta_lbl.setAlignment(Qt.AlignCenter)
-        delta_lbl.setStyleSheet("font-size: 12px;")
-        if is_neutral:
-            delta_lbl.setProperty("class", "MetricNeutral")
-        elif is_positive_delta:
-            delta_lbl.setProperty("class", "MetricDeltaPositive")
-        else:
-            delta_lbl.setProperty("class", "MetricDeltaNegative")
-            
-        layout.addWidget(title_lbl)
-        layout.addLayout(val_layout)
+        delta_lbl = None
         if delta_text:
-            layout.addWidget(delta_lbl)
+            delta_lbl = QLabel(delta_text)
+            if is_neutral:
+                delta_lbl.setProperty("class", "MetricNeutral")
+            elif is_positive:
+                delta_lbl.setProperty("class", "MetricDeltaPositive")
+            else:
+                delta_lbl.setProperty("class", "MetricDeltaNegative")
+            delta_lbl.setAlignment(Qt.AlignCenter)
             
-        self.setMinimumWidth(120)
+        layout.addWidget(lbl)
+        layout.addWidget(val_lbl)
+        if delta_lbl:
+            layout.addWidget(delta_lbl)
 
 class MetricGroup(QWidget):
-    def __init__(self, title_main, title_sub, metrics, color, parent=None):
-        """
-        metrics: list of dicts: {'title': str, 'before': str, 'after': str, 'delta': str, 'pos': bool, 'neutral': bool}
-        """
+    """
+    Card containing a group of related metrics
+    """
+    def __init__(self, title, metrics, parent=None):
         super().__init__(parent)
         self.setProperty("class", "Card")
         
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(15, 12, 15, 15)
-        layout.setSpacing(10)
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(16, 16, 16, 16)
+        main_layout.setSpacing(12)
         
-        # Title Layout
-        title_layout = QHBoxLayout()
-        main_lbl = QLabel(title_main)
-        main_lbl.setStyleSheet(f"color: {color}; font-weight: bold; font-size: 14px;")
+        title_lbl = QLabel(title)
+        title_lbl.setStyleSheet("font-size: 14px; font-weight: 650; color: #111827;")
         
-        sub_lbl = QLabel(title_sub)
-        sub_lbl.setStyleSheet("color: #556270; font-size: 14px;")
+        main_layout.addWidget(title_lbl)
         
-        title_layout.addWidget(main_lbl)
-        title_layout.addWidget(sub_lbl)
-        title_layout.addStretch()
+        metrics_layout = QHBoxLayout()
+        metrics_layout.setSpacing(8)
         
-        layout.addLayout(title_layout)
-        
-        # Metrics line
-        cards_layout = QHBoxLayout()
-        cards_layout.setSpacing(5)
-        for i, m in enumerate(metrics):
-            card = MetricCard(
-                m['title'], 
-                m.get('before'), 
-                m.get('after'), 
-                m.get('delta'), 
-                m.get('pos', True),
-                m.get('neutral', False)
-            )
-            cards_layout.addWidget(card)
-            
-            # Add vertical line separator between metrics
-            if i < len(metrics) - 1:
+        for i, metric in enumerate(metrics):
+            if i > 0:
+                # Add thin separator
                 line = QFrame()
                 line.setFrameShape(QFrame.VLine)
-                line.setStyleSheet("color: #E8ECEF;")
-                cards_layout.addWidget(line)
+                line.setFrameShadow(QFrame.Sunken)
+                line.setStyleSheet("color: #E5E7EB;")
+                metrics_layout.addWidget(line)
                 
-        layout.addLayout(cards_layout)
+            card = MetricCard(
+                label=metric['label'],
+                value=metric['val'],
+                delta_text=metric.get('delta', ''),
+                is_positive=metric.get('is_positive', True),
+                is_neutral=metric.get('is_neutral', False)
+            )
+            metrics_layout.addWidget(card, stretch=1)
+            
+        main_layout.addLayout(metrics_layout)
 
 def create_all_metric_groups():
-    """Factory function to create the row of metric groups."""
     container = QWidget()
     layout = QHBoxLayout(container)
     layout.setContentsMargins(0, 0, 0, 0)
@@ -105,29 +86,31 @@ def create_all_metric_groups():
     
     # 1. Video Quality
     vq_metrics = [
-        {'title': "VMAF \u2191", 'before': "58.3", 'after': "82.6", 'delta': "+24.3 (41.7%)", 'pos': True},
-        {'title': "SSIM \u2191", 'before': "0.912", 'after': "0.971", 'delta': "+0.059 (6.5%)", 'pos': True},
-        {'title': "PSNR \u2191", 'before': "26.1", 'after': "32.8", 'delta': "+6.7 dB (25.7%)", 'pos': True}
+        {'label': 'VMAF', 'val': '8.3 \u2192 82.6', 'delta': '+74.3 (+895%)', 'is_positive': True},
+        {'label': 'SSIM', 'val': '0.912 \u2192 0.971', 'delta': '+0.059 (+6.5%)', 'is_positive': True},
+        {'label': 'PSNR', 'val': '26.1 \u2192 32.8', 'delta': '+6.7 dB (+25.7%)', 'is_positive': True}
     ]
-    layout.addWidget(MetricGroup("Video Quality", " (before \u2192 after)", vq_metrics, "#D95D39"))
+    vq_group = MetricGroup("Video Quality (Before \u2192 After)", vq_metrics)
     
     # 2. Tracking Performance
     tp_metrics = [
-        {'title': "HOTA \u2191", 'before': "61.2", 'after': "78.9", 'delta': "+17.7 (28.9%)", 'pos': True},
-        {'title': "IDF1 \u2191", 'before': "66.3", 'after': "84.7", 'delta': "+18.4 (27.8%)", 'pos': True},
-        {'title': "ID Switches \u2193", 'before': "186", 'after': "62", 'delta': "\u2212124 (\u221266.7%)", 'pos': True},
-        {'title': "False Negatives \u2193", 'before': "1,243", 'after': "512", 'delta': "\u2212731 (\u221258.8%)", 'pos': True}
+        {'label': 'HOTA', 'val': '61.2 \u2192 78.9', 'delta': '+17.7 (+28.9%)', 'is_positive': True},
+        {'label': 'IDF1', 'val': '66.3 \u2192 84.7', 'delta': '+18.4 (+27.8%)', 'is_positive': True},
+        {'label': 'ID Switches', 'val': '186 \u2192 62', 'delta': '-124 (-66.7%)', 'is_positive': True}, # Less is better, so positive
+        {'label': 'False Negatives', 'val': '1,243 \u2192 512', 'delta': '-731 (-58.8%)', 'is_positive': True}
     ]
-    layout.addWidget(MetricGroup("Tracking Performance", " (before \u2192 after)", tp_metrics, "#087E8B"))
+    tp_group = MetricGroup("Tracking Performance", tp_metrics)
     
-    # 3. Runtime
+    # 3. Runtime / Deployment
     rt_metrics = [
-        {'title': "FPS (avg)", 'before': None, 'after': "21.4", 'delta': "frames / sec", 'neutral': True},
-        {'title': "Latency (avg)", 'before': None, 'after': "46.3", 'delta': "ms / frame", 'neutral': True},
-        {'title': "GPU Usage", 'before': None, 'after': "68%", 'delta': "RTX 3090", 'neutral': True}
+        {'label': 'FPS (avg)', 'val': '21.4', 'delta': 'frames / sec', 'is_neutral': True},
+        {'label': 'Latency (avg)', 'val': '46.3', 'delta': 'ms / frame', 'is_neutral': True},
+        {'label': 'GPU Usage', 'val': '68%', 'delta': 'RTX 3090', 'is_neutral': True}
     ]
-    layout.addWidget(MetricGroup("Runtime / Deployment", " (enhanced)", rt_metrics, "#1F5A94"))
+    rt_group = MetricGroup("Runtime / Deployment (Enhanced)", rt_metrics)
     
-    layout.addStretch()
+    layout.addWidget(vq_group, stretch=3)
+    layout.addWidget(tp_group, stretch=4)
+    layout.addWidget(rt_group, stretch=3)
     
     return container
