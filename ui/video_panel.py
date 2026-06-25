@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QPen, QFont
 from PySide6.QtCore import Qt, QRect
 
@@ -29,13 +29,24 @@ class VideoCanvas(QWidget):
         self.image_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.image_label)
         
-        # Set background
-        self.setStyleSheet("background-color: #000000; border-radius: 8px;")
+        # Transparent background so it doesn't show black blocks if aspect ratio isn't perfect
+        self.setStyleSheet("background-color: transparent;")
         
         # Colors
-        self.box_color = QColor("#087E8B") if is_enhanced else QColor("#D95D39")
-        self.text_bg_color = QColor("#1D232B")
-        self.text_bg_color.setAlpha(200)
+        self.box_color = QColor("#0F766E") if is_enhanced else QColor("#EF4444")
+        self.text_bg_color = QColor("#111827")
+        self.text_bg_color.setAlpha(220)
+        
+        # Aspect ratio enforcement
+        policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        policy.setHeightForWidth(True)
+        self.setSizePolicy(policy)
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, width):
+        return int(width * 9 / 16)
 
     def set_overlay_flags(self, tracks, ids, conf, detections):
         self.show_tracks = tracks
@@ -68,10 +79,10 @@ class VideoCanvas(QWidget):
             painter.setRenderHint(QPainter.Antialiasing)
             
             pen = QPen(self.box_color)
-            pen.setWidth(3)
+            pen.setWidth(2)
             painter.setPen(pen)
             
-            font = QFont("Segoe UI", 12, QFont.Bold)
+            font = QFont("Inter", 11, QFont.Bold)
             painter.setFont(font)
             
             for track in self.current_tracks:
