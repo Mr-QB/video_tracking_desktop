@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy
 from PySide6.QtGui import QImage, QPixmap, QPainter, QColor, QPen, QFont
-from PySide6.QtCore import Qt, QRect
+from PySide6.QtCore import Qt, QRect, QSize
 
 class VideoCanvas(QWidget):
     """
@@ -18,35 +18,47 @@ class VideoCanvas(QWidget):
         self.show_confidence = True
         self.show_detections = False
         
-        self.current_image = None
+        self.current_image = None  # Will be set when first frame arrives
         self.current_tracks = []
         
         # Layout
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self._layout = QVBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
         
         self.image_label = QLabel()
         self.image_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.image_label)
+        # CRITICAL: Set Ignored so QLabel does NOT drive the layout size based on pixmap.
+        # Without this, every setPixmap() call changes the sizeHint of the label,
+        # causing a layout recalculation → resizeEvent → update_display() → infinite loop.
+        self.image_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.image_label.setMinimumSize(1, 1)
+        self._layout.addWidget(self.image_label)
         
-        # Transparent background so it doesn't show black blocks if aspect ratio isn't perfect
-        self.setStyleSheet("background-color: transparent;")
+        # Dark background so collapsed state looks clean
+        self.setStyleSheet("background-color: #1a1a2e;")
         
         # Colors
         self.box_color = QColor("#0F766E") if is_enhanced else QColor("#EF4444")
         self.text_bg_color = QColor("#111827")
         self.text_bg_color.setAlpha(220)
         
-        # Aspect ratio enforcement
+        # Lock in a 16:9 aspect ratio for the canvas widget itself.
+        # QSizePolicy.Expanding on both axes + heightForWidth drives the layout.
         policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         policy.setHeightForWidth(True)
         self.setSizePolicy(policy)
+        
+        # Minimum height so the canvas never collapses to 0
+        self.setMinimumHeight(180)
 
     def hasHeightForWidth(self):
         return True
 
     def heightForWidth(self, width):
         return int(width * 9 / 16)
+
+    def sizeHint(self):
+        return QSize(640, 360)  # Sensible default so layout has a starting size
 
     def set_overlay_flags(self, tracks, ids, conf, detections):
         self.show_tracks = tracks
@@ -82,7 +94,7 @@ class VideoCanvas(QWidget):
             pen.setWidth(2)
             painter.setPen(pen)
             
-            font = QFont("Inter", 11, QFont.Bold)
+            font = QFont("Inter", 10, QFont.Bold)
             painter.setFont(font)
             
             for track in self.current_tracks:
@@ -92,6 +104,7 @@ class VideoCanvas(QWidget):
                 
                 # Draw Bounding Box
                 if self.show_tracks:
+                    painter.setPen(pen)
                     painter.drawRect(x, y, bw, bh)
                 
                 # Prepare Label Text
@@ -109,20 +122,29 @@ class VideoCanvas(QWidget):
                     text_width = fm.horizontalAdvance(label_text)
                     text_height = fm.height()
                     
-                    bg_rect = QRect(x, y - text_height - 4, text_width + 8, text_height + 4)
+                    bg_rect = QRect(x, max(0, y - text_height - 4), text_width + 8, text_height + 4)
                     painter.fillRect(bg_rect, self.text_bg_color)
                     
                     # Draw label text
                     painter.setPen(QColor("#FFFFFF"))
-                    painter.drawText(x + 4, y - 4, label_text)
-                    painter.setPen(pen) # Restore pen
+                    painter.drawText(x + 4, max(text_height, y - 4), label_text)
                     
             painter.end()
 
-        # Scale pixmap to fit widget while maintaining aspect ratio
-        scaled_pixmap = pixmap.scaled(self.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        # Scale pixmap to fit the widget while maintaining aspect ratio.
+        # Since the label's sizePolicy is Ignored, this scale uses the widget's size
+        # (not the label's size) so there is NO feedback loop.
+        target_size = self.size()
+        if target_size.width() > 0 and target_size.height() > 0:
+            scaled_pixmap = pixmap.scaled(target_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        else:
+            # Widget not laid out yet: scale to sizeHint so there's something to show
+            scaled_pixmap = pixmap.scaled(self.sizeHint(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        
         self.image_label.setPixmap(scaled_pixmap)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
+        # Redraw at the new size. Safe because the label's sizePolicy is Ignored,
+        # so setPixmap() does NOT trigger another layout/resize cycle.
         self.update_display()

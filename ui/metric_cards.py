@@ -105,7 +105,7 @@ def create_all_metric_groups():
     rt_metrics = [
         {'label': 'FPS (avg)', 'val': '21.4', 'delta': 'frames / sec', 'is_neutral': True},
         {'label': 'Latency (avg)', 'val': '46.3', 'delta': 'ms / frame', 'is_neutral': True},
-        {'label': 'GPU Usage', 'val': '68%', 'delta': 'RTX 3090', 'is_neutral': True}
+        {'label': 'GPU Usage', 'val': '68%', 'delta': 'Jetson AGX Orin', 'is_neutral': True}
     ]
     rt_group = MetricGroup("Runtime / Deployment (Enhanced)", rt_metrics)
     

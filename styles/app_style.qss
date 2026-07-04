@@ -8,7 +8,7 @@ QWidget {
 
 /* Headers and Titles */
 QLabel#MainTitle {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 700;
     color: #111827;
     line-height: 1.2;
