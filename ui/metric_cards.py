@@ -111,13 +111,12 @@ class MetricDashboard(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(8)
         
-        # 1. Video Quality
+        # 1. Video Quality vs Original
         vq_metrics = [
-            {'id': 'vmaf', 'label': 'VMAF', 'val': '-', 'delta': '-', 'is_positive': True},
-            {'id': 'ssim', 'label': 'SSIM', 'val': '-', 'delta': '-', 'is_positive': True},
-            {'id': 'psnr', 'label': 'PSNR', 'val': '-', 'delta': '-', 'is_positive': True}
+            {'id': 'psnr', 'label': 'PSNR (vs Orig)', 'val': '-', 'delta': '-', 'is_positive': True},
+            {'id': 'ssim', 'label': 'SSIM (vs Orig)', 'val': '-', 'delta': '-', 'is_positive': True}
         ]
-        self.vq_group = MetricGroup("Video Quality (Before \u2192 After)", vq_metrics)
+        self.vq_group = MetricGroup("Video Quality (Comp vs Orig \u2192 Enh vs Orig)", vq_metrics)
         
         # 2. Tracking Performance
         tp_metrics = [
@@ -171,13 +170,28 @@ class MetricDashboard(QWidget):
         df = fe - fb
         self.tp_group.update_card('false_negatives', f"{fb} \u2192 {fe}", f"{df:+} ({(df/max(1, fb))*100:+.1f}%)", is_positive=(df <= 0))
 
-    def update_quality_metrics(self, psnr_val, ssim_val, vmaf_val):
-        def _fmt(val):
-            return f"{val:.1f}" if isinstance(val, float) else str(val)
-        
-        self.vq_group.update_card('vmaf', f"{_fmt(vmaf_val)}", "score", is_positive=True, is_neutral=True)
-        self.vq_group.update_card('ssim', f"{ssim_val:.3f}", "index", is_positive=True, is_neutral=True)
-        self.vq_group.update_card('psnr', f"{_fmt(psnr_val)}", "dB", is_positive=True, is_neutral=True)
+    def update_quality_metrics(self, comp_psnr, enh_psnr, comp_ssim, enh_ssim):
+        def _fmt_psnr(val):
+            return f"{val:.1f}" if isinstance(val, (int, float)) else str(val)
+            
+        def _fmt_ssim(val):
+            return f"{val:.3f}" if isinstance(val, (int, float)) else str(val)
+
+        # PSNR (vs Orig): Comp -> Enh
+        if isinstance(comp_psnr, (int, float)) and isinstance(enh_psnr, (int, float)):
+            delta_p = enh_psnr - comp_psnr
+            pct_p = (delta_p / max(1e-5, comp_psnr)) * 100
+            self.vq_group.update_card('psnr', f"{_fmt_psnr(comp_psnr)} \u2192 {_fmt_psnr(enh_psnr)} dB", f"{delta_p:+.1f} dB ({pct_p:+.1f}%)", is_positive=(delta_p >= 0))
+        else:
+            self.vq_group.update_card('psnr', f"{comp_psnr} \u2192 {enh_psnr}", "dB", is_positive=True, is_neutral=True)
+
+        # SSIM (vs Orig): Comp -> Enh
+        if isinstance(comp_ssim, (int, float)) and isinstance(enh_ssim, (int, float)):
+            delta_s = enh_ssim - comp_ssim
+            pct_s = (delta_s / max(1e-5, comp_ssim)) * 100
+            self.vq_group.update_card('ssim', f"{_fmt_ssim(comp_ssim)} \u2192 {_fmt_ssim(enh_ssim)}", f"{delta_s:+.3f} ({pct_s:+.1f}%)", is_positive=(delta_s >= 0))
+        else:
+            self.vq_group.update_card('ssim', f"{comp_ssim} \u2192 {enh_ssim}", "index", is_positive=True, is_neutral=True)
 
     def update_runtime_metrics(self, fps, latency, gpu_usage="68%"):
         def _fmt(val):

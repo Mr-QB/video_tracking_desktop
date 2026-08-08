@@ -5,7 +5,14 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPainter, QColor, QPen
+import sys
 import os
+from pathlib import Path
+
+# Ensure project root is in sys.path when running main_window.py directly
+project_root = str(Path(__file__).parent.parent)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 
 from ui.video_panel import VideoCanvas
 from ui.metric_cards import MetricDashboard
@@ -210,13 +217,38 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(12, 6, 12, 6)
         layout.setSpacing(12)
 
-        # Read available algorithms from the eval directory
-        eval_base_dir = APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results")
+        # Read available algorithms from models/MOT20 and eval_results directory
         algorithms = ["original"]
+        extracted_methods = set()
+        
+        models_mot20_dir = Path(__file__).parent.parent / "models" / "MOT20"
+        if models_mot20_dir.exists():
+            for d in os.listdir(models_mot20_dir):
+                if d.startswith("NAFNet_"):
+                    parts = d.split("_")
+                    if len(parts) > 2:
+                        suffix = "_".join(parts[2:])
+                        extracted_methods.add(suffix)
+                        
+        eval_base_dir = APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results")
         if os.path.exists(eval_base_dir):
             for d in os.listdir(eval_base_dir):
                 if os.path.isdir(os.path.join(eval_base_dir, d)) and d not in ["Compressed", "original"] and not d.startswith("QP"):
-                    algorithms.append(d)
+                    clean_d = d.replace("NAFNet_", "").replace("QP51", "").replace("QP47", "").replace("QP42", "").replace("QP37", "").strip("_")
+                    if clean_d:
+                        extracted_methods.add(clean_d)
+                    else:
+                        extracted_methods.add(d)
+
+        # Standard ordered list of NAFNet suffixes
+        standard_order = ["combined", "feature_loss", "p_r", "p_r_feature_loss", "perception", "sideinfo", "sideinfo_feature_loss"]
+        for m in standard_order:
+            if m in extracted_methods:
+                algorithms.append(m)
+                extracted_methods.remove(m)
+                
+        for m in sorted(list(extracted_methods)):
+            algorithms.append(m)
         
         # Read available codecs from the dataset/test directory
         dataset_dir = APP_CONFIG.get("paths", {}).get("dataset_images_dir", "")
@@ -420,6 +452,16 @@ class MainWindow(QMainWindow):
     def on_mode_changed(self, mode_name):
         is_realtime = (mode_name == "Realtime Benchmark")
         self.video_controller.set_realtime_mode(is_realtime)
+        
+        # Reset video to frame 0 and pause
+        self.video_controller.pause()
+        self.video_controller.set_frame(0)
+        if hasattr(self, 'play_btn'):
+            self.play_btn.setChecked(False)
+            self.play_btn.setText("▶")
+        if hasattr(self, 'slider'):
+            self.slider.setValue(0)
+
         if is_realtime:
             self.metric_dashboard.tp_group.set_calculating()
             self.metric_dashboard.vq_group.set_calculating()
@@ -428,13 +470,14 @@ class MainWindow(QMainWindow):
             # Reset chart history for new run
             self.tracking_chart.clear_bar_chart()
             self.tracking_chart.clear_chart()
-            # playback start will be handled by on_models_loaded callback
         else:
             self.video_controller.stop()
-            if hasattr(self, 'play_btn'):
-                self.play_btn.setChecked(False)
-                self.play_btn.setText("▶")
             self._update_all_metrics()
+            
+        seq_name = self.seq_cb.currentText() if hasattr(self, 'seq_cb') and self.seq_cb else "MOT20-01"
+        codec_name = self.codec_cb.currentText() if hasattr(self, 'codec_cb') and self.codec_cb else "QP51"
+        algo_name = self.enh_algo_cb.currentText() if hasattr(self, 'enh_algo_cb') and self.enh_algo_cb else "original"
+        self._update_data_and_metrics(seq_name, codec_name, algo_name)
 
     def on_models_loading_started(self):
         if not hasattr(self, 'loading_dialog') or self.loading_dialog is None:
@@ -458,8 +501,8 @@ class MainWindow(QMainWindow):
                 self.play_btn.setChecked(True)
                 self.play_btn.setText("❚❚")
 
-    def on_realtime_metrics_updated(self, psnr_val, ssim_val, vmaf_val, fps, latency):
-        self.metric_dashboard.update_quality_metrics(psnr_val, ssim_val, vmaf_val)
+    def on_realtime_metrics_updated(self, comp_psnr, enh_psnr, comp_ssim, enh_ssim, fps, latency):
+        self.metric_dashboard.update_quality_metrics(comp_psnr, enh_psnr, comp_ssim, enh_ssim)
         self.metric_dashboard.update_runtime_metrics(fps, latency)
 
     def on_realtime_chart_updated(self, frame_idx, c_conf, e_conf):
@@ -487,8 +530,8 @@ class MainWindow(QMainWindow):
         )
         self.metric_dashboard.update_tracking_metrics(comp_metrics, enh_metrics)
         
-        # Default quality and runtime for offline
-        self.metric_dashboard.update_quality_metrics(35.2, 0.965, 88.4)
+        # Quality metrics vs Original for offline: Comp vs Orig -> Enh vs Orig
+        self.metric_dashboard.update_quality_metrics(28.4, 35.2, 0.865, 0.965)
         self.metric_dashboard.update_runtime_metrics(21.4, 46.3)
 
     def toggle_play(self):
@@ -521,6 +564,21 @@ class MainWindow(QMainWindow):
         if not seq_name or not codec_name or not algo_name:
             return
             
+        # Reset video controller to frame 0 and pause playback
+        if hasattr(self, 'video_controller') and self.video_controller:
+            self.video_controller.pause()
+            self.video_controller.set_frame(0)
+            
+        if hasattr(self, 'play_btn'):
+            self.play_btn.setChecked(False)
+            self.play_btn.setText("▶")
+            
+        if hasattr(self, 'slider'):
+            self.slider.setValue(0)
+            
+        if hasattr(self, 'tracking_chart'):
+            self.tracking_chart.clear_chart()
+
         # 1. Evaluate/load metrics
         eval_base = APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results")
         
@@ -530,7 +588,12 @@ class MainWindow(QMainWindow):
         if algo_name == "original":
             enh_dir = os.path.join(eval_base, "original", seq_name)
         else:
-            enh_dir = os.path.join(eval_base, algo_name, seq_name)
+            candidates = [
+                os.path.join(eval_base, f"NAFNet_{codec_name}_{algo_name}", seq_name),
+                os.path.join(eval_base, f"NAFNet_{algo_name}", seq_name),
+                os.path.join(eval_base, algo_name, seq_name)
+            ]
+            enh_dir = next((c for c in candidates if os.path.exists(c)), os.path.join(eval_base, algo_name, seq_name))
         
         # If codec directory doesn't exist in eval_results, fallback to mock "Compressed"
         if not os.path.exists(comp_dir):
@@ -539,8 +602,8 @@ class MainWindow(QMainWindow):
                 # Fallback to root level if seq doesn't exist
                 comp_dir = os.path.join(eval_base, "Compressed")
             
-        base_metrics = evaluate_and_cache_metrics(comp_dir, codec_name, is_baseline=True)
-        enh_metrics = evaluate_and_cache_metrics(enh_dir, algo_name, is_baseline=False)
+        base_metrics = evaluate_and_cache_metrics(comp_dir, codec_name, is_baseline=True, seq_name=seq_name, codec_name=codec_name)
+        enh_metrics = evaluate_and_cache_metrics(enh_dir, algo_name, is_baseline=False, seq_name=seq_name, codec_name=codec_name)
         
         # 2. Update UI metric cards
         if getattr(self.video_controller, 'is_realtime_mode', False):
@@ -551,7 +614,7 @@ class MainWindow(QMainWindow):
             self.tracking_chart.clear_chart()
         else:
             self.metric_dashboard.update_tracking_metrics(base_metrics, enh_metrics)
-            self.metric_dashboard.update_quality_metrics(35.2, 0.965, 88.4)
+            self.metric_dashboard.update_quality_metrics(28.4, 35.2, 0.865, 0.965)
             self.metric_dashboard.update_runtime_metrics(21.4, 46.3)
             self.tracking_chart.update_bar_chart(base_metrics, enh_metrics)
         
@@ -559,6 +622,17 @@ class MainWindow(QMainWindow):
         try:
             self.video_controller.reload_tracking_data(seq_name, codec_name, algo_name)
             
+            # Check if NAFNet model for this exact QP was loaded or missing
+            if algo_name != "original" and hasattr(self.video_controller, 'worker') and self.video_controller.worker:
+                enhancer = getattr(self.video_controller.worker, 'enhancer', None)
+                if enhancer and not getattr(enhancer, 'is_loaded', False):
+                    QMessageBox.warning(
+                        self,
+                        "Thiếu Model NAFNet",
+                        f"Không tìm thấy file trọng số model NAFNet cho mức nén {codec_name} và phương pháp '{algo_name}'!\n\n"
+                        f"Vui lòng bổ sung file trọng số vào đường dẫn:\nmodels/MOT20/NAFNet_{codec_name}_{algo_name}/best.pth"
+                    )
+
             # Update the Detections Over Frames chart with real data
             self.tracking_chart.update_line_chart(
                 self.video_controller.comp_tracks_data,
