@@ -1,5 +1,12 @@
 import sys
 import os
+from pathlib import Path
+
+# Ensure project root is in sys.path
+project_root = str(Path(__file__).parent)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 from PySide6.QtWidgets import QApplication
 from ui.main_window import MainWindow
 
