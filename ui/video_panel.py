@@ -35,7 +35,7 @@ class VideoCanvas(QWidget):
         self._layout.addWidget(self.image_label)
         
         # Dark background so collapsed state looks clean
-        self.setStyleSheet("background-color: #1a1a2e;")
+        self.setStyleSheet("background-color: #0f0f1a; border-radius: 6px;")
         
         # Colors
         self.box_color = QColor("#0F766E") if is_enhanced else QColor("#EF4444")
@@ -48,8 +48,8 @@ class VideoCanvas(QWidget):
         policy.setHeightForWidth(True)
         self.setSizePolicy(policy)
         
-        # Minimum height so the canvas never collapses to 0
-        self.setMinimumHeight(180)
+        # Minimum height ensures videos remain clearly visible.
+        self.setMinimumHeight(340)
 
     def hasHeightForWidth(self):
         return True
@@ -58,7 +58,7 @@ class VideoCanvas(QWidget):
         return int(width * 9 / 16)
 
     def sizeHint(self):
-        return QSize(640, 360)  # Sensible default so layout has a starting size
+        return QSize(900, 506)  # Large default so video panels take up generous space
 
     def set_overlay_flags(self, tracks, ids, conf, detections):
         self.show_tracks = tracks

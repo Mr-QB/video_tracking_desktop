@@ -3,25 +3,25 @@ QWidget {
     background-color: #F3F4F6;
     color: #1F2937;
     font-family: 'Inter', 'Geist', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 /* Headers and Titles */
 QLabel#MainTitle {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     color: #111827;
     line-height: 1.2;
 }
 
 QLabel#SubTitle {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
     color: #6B7280;
 }
 
 QLabel#SectionTitle {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 650;
     color: #111827;
 }
@@ -38,8 +38,8 @@ QComboBox {
     background-color: #FFFFFF;
     border: 1px solid #D1D5DB;
     border-radius: 6px;
-    padding: 6px 12px;
-    height: 36px;
+    padding: 4px 10px;
+    height: 30px;
     color: #1F2937;
 }
 
@@ -55,8 +55,8 @@ QPushButton {
     background-color: #FFFFFF;
     border: 1px solid #D1D5DB;
     border-radius: 6px;
-    padding: 6px 16px;
-    height: 36px;
+    padding: 5px 14px;
+    height: 30px;
     font-weight: 500;
     color: #1F2937;
 }
@@ -75,17 +75,39 @@ QPushButton#PrimaryActionButton:hover {
     background-color: #115E59;
 }
 
+/* Video Cards (wrapper around each video panel) */
+.VideoCard {
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+}
+
+QFrame#CompressedVideoCard {
+    border-top: 3px solid #EF4444;
+}
+
+QFrame#EnhancedVideoCard {
+    border-top: 3px solid #0F766E;
+}
+
+QLabel#VideoPanelTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+    background: transparent;
+}
+
 /* Video Canvases */
 QWidget#CompressedCanvas {
-    background-color: #111827;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    background-color: #0f0f1a;
+    border: none;
+    border-radius: 6px;
 }
 
 QWidget#EnhancedCanvas {
-    background-color: #111827;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
+    background-color: #0f0f1a;
+    border: none;
+    border-radius: 6px;
 }
 
 QLabel#CompressedBadge {
@@ -93,9 +115,9 @@ QLabel#CompressedBadge {
     background-color: #FEF2F2;
     border: 1px solid #FEE2E2;
     border-radius: 14px;
-    padding: 6px 10px;
+    padding: 4px 10px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 QLabel#EnhancedBadge {
@@ -103,9 +125,9 @@ QLabel#EnhancedBadge {
     background-color: #F0FDFA;
     border: 1px solid #CCFBF1;
     border-radius: 14px;
-    padding: 6px 10px;
+    padding: 4px 10px;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 /* Playback Control */
@@ -118,11 +140,11 @@ QWidget#PlaybackBar {
 QPushButton#PlayButton {
     background: transparent;
     border: none;
-    font-size: 16px;
+    font-size: 15px;
     color: #374151;
     padding: 0;
-    min-width: 32px;
-    height: 32px;
+    min-width: 30px;
+    height: 30px;
 }
 QPushButton#PlayButton:hover {
     color: #0F766E;
@@ -211,7 +233,7 @@ QTableWidget::item:selected {
 
 /* Metric text */
 .MetricValue {
-    font-size: 22px;
+    font-size: 15px;
     font-weight: 700;
     color: #111827;
 }
@@ -219,18 +241,18 @@ QTableWidget::item:selected {
 .MetricDeltaPositive {
     color: #0F766E;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 .MetricDeltaNegative {
     color: #EF4444;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 .MetricNeutral {
     color: #6B7280;
-    font-size: 12px;
+    font-size: 10px;
 }
 
 /* Badges */

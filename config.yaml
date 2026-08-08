@@ -1,0 +1,3 @@
+paths:
+  dataset_images_dir: "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/UI/video_tracking_desktop/dataset/test"
+  eval_results_dir: "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/yolo_tracker/eval_results"
