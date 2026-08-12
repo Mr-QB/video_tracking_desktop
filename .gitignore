@@ -1,6 +1,7 @@
 # Data and evaluation results
 dataset/*
 eval_results/*
+models/*
 
 # Python cache
 **/__pycache__/

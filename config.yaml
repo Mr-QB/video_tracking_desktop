@@ -1,7 +1,7 @@
 paths:
-  dataset_images_dir: "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/UI/video_tracking_desktop/dataset/test"
-  eval_results_dir: "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/yolo_tracker/eval_results"
-  models_dir: "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/UI/video_tracking_desktop/models"
+  dataset_images_dir: "dataset/test"
+  eval_results_dir: "eval_results"
+  models_dir: "models"
 
 yolo:
   conf: 0.25         # Ngưỡng Confidence score phát hiện đối tượng (0.0 đến 1.0)

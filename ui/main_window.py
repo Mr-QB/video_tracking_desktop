@@ -20,7 +20,7 @@ from ui.timeline_chart import TrackingComparisonChart
 from core.video_controller import VideoController
 from core.mock_data import get_failure_cases
 from core.metric_evaluator import evaluate_and_cache_metrics
-from core.config import APP_CONFIG
+from core.config import APP_CONFIG, get_path
 
 class SpinnerWidget(QWidget):
     def __init__(self, parent=None):
@@ -243,7 +243,7 @@ class MainWindow(QMainWindow):
             algorithms = ["combined"]
         
         # Read available codecs from the dataset/test directory
-        dataset_dir = APP_CONFIG.get("paths", {}).get("dataset_images_dir", "")
+        dataset_dir = str(get_path("dataset_images_dir", "dataset/test"))
         codecs = []
         if os.path.exists(dataset_dir):
             for d in os.listdir(dataset_dir):
@@ -517,7 +517,7 @@ class MainWindow(QMainWindow):
             seq_name = self.video_controller.current_seq
             codec_name = self.video_controller.current_codec
             algo_name = self.video_controller.current_enhancement
-            eval_base = APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results")
+            eval_base = str(get_path("eval_results_dir", "eval_results"))
             
             comp_dir = os.path.join(eval_base, codec_name, seq_name)
             enh_dir = os.path.join(eval_base, "original", seq_name) if algo_name == "original" else os.path.join(eval_base, f"NAFNet_{codec_name}_{algo_name}", seq_name)
@@ -579,7 +579,7 @@ class MainWindow(QMainWindow):
             self.tracking_chart.clear_chart()
 
         # 1. Evaluate/load metrics
-        eval_base = APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results")
+        eval_base = str(get_path("eval_results_dir", "eval_results"))
         
         # Path: eval_results / <Codec_or_Algo> / <Sequence>
         comp_dir = os.path.join(eval_base, codec_name, seq_name)
