@@ -84,9 +84,9 @@ def get_gpu_name() -> str:
 
 def get_active_device_name(use_gpu: bool = None) -> str:
     """
-    Get the name of the active compute device (GPU or CPU).
-    If GPU is available and used, return GPU name.
-    If CPU is used or CUDA is unavailable, return CPU name.
+    Get the name of the active compute device with explicit prefix ('GPU: ...' or 'CPU: ...').
+    If GPU is available and used, return 'GPU: <gpu_name>'.
+    If CPU is used or CUDA is unavailable, return 'CPU: <cpu_name>'.
     """
     try:
         import torch
@@ -95,9 +95,10 @@ def get_active_device_name(use_gpu: bool = None) -> str:
         if use_gpu and torch.cuda.is_available():
             gpu_name = get_gpu_name()
             if gpu_name:
-                return gpu_name
+                return f"GPU: {gpu_name}"
     except Exception:
         pass
-    return get_cpu_name()
+    return f"CPU: {get_cpu_name()}"
+
 
 
