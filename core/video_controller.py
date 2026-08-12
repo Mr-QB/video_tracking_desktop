@@ -80,11 +80,10 @@ class ModelLoaderThread(QThread):
         try:
             from ultralytics import YOLO
             import torch
-            from core.config import APP_CONFIG
+            from core.config import APP_CONFIG, get_path
             
-            app_dir = Path(__file__).parent.parent
-            models_dir_cfg = APP_CONFIG.get("paths", {}).get("models_dir")
-            models_dir = Path(models_dir_cfg) if models_dir_cfg else app_dir / "models"
+            models_dir = get_path("models_dir", "models")
+            app_dir = models_dir.parent
             
             weight_candidates = [
                 models_dir / "yolo_best.pt",
@@ -369,9 +368,9 @@ class VideoController(QObject):
         self.models_loaded.emit()
 
     def _init_dataset_and_tracking(self):
-        from core.config import APP_CONFIG
-        self.dataset_dir = Path(APP_CONFIG.get("paths", {}).get("dataset_images_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/UI/video_tracking_desktop/dataset/test"))
-        self.eval_base = Path(APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results"))
+        from core.config import APP_CONFIG, get_path
+        self.dataset_dir = get_path("dataset_images_dir", "dataset/test")
+        self.eval_base = get_path("eval_results_dir", "eval_results")
         
         self.current_seq = "MOT20-01"
         self.current_codec = "QP51"

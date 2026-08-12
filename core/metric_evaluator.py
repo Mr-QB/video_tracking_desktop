@@ -5,6 +5,7 @@ import shutil
 import numpy as np
 import pandas as pd
 from pathlib import Path
+from core.config import get_path
 
 # Patch numpy aliases for TrackEval compatibility
 np.float = float
@@ -169,9 +170,9 @@ def compute_dynamic_qp_metrics(codec_name, algo_name, seq_name="MOT20-01", is_ba
     }
 
 def evaluate_and_cache_metrics(method_dir, method_name, is_baseline=False, seq_name="MOT20-01", codec_name="QP37"):
-    base_dir = Path(__file__).parent.parent
-    gt_file = base_dir / "dataset" / "test" / "original" / seq_name / "gt" / "gt.txt"
-    eval_base = base_dir / "eval_results"
+    dataset_dir = get_path("dataset_images_dir", "dataset/test")
+    gt_file = dataset_dir / "original" / seq_name / "gt" / "gt.txt"
+    eval_base = get_path("eval_results_dir", "eval_results")
     
     target_track_filename = "comp_tracks.txt" if is_baseline else "enh_tracks.txt"
     
