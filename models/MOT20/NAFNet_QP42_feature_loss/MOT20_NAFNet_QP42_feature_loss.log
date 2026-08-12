@@ -1,0 +1,278 @@
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet/train_MOT20_QP42_feature_loss.yml
+Random seed set to: 7
+Mixed precision (AMP): False
+Resuming Comet ML ExistingExperiment: d7dda60569ba48daaf112a0cf990ece8
+
+Comet ML logging initialized successfully.
+
+Using GPU device: Tesla V100-SXM2-32GB
+Initializing datasets...
+Initializing NAFNet model...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP42_feature_loss
+CosineAnnealingRestartLR Scheduler initialized.
+Loading frozen YOLO model for feature loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO Feature Loss prepped successfully.
+Starting training: start_epoch=1, total_epochs=224, iterations_per_epoch=893
+
+Iter [5000/200000] | Loss: 0.039245 (Rec: 0.019527, Feat: 0.394365) | LR: 9.76e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.7903 dB | Avg SSIM: 0.88846 | Feature Loss: 0.369063
+
+--> New best PSNR performance: 31.7903 dB! Saving best weight checkpoint...
+
+Iter [10000/200000] | Loss: 0.037941 (Rec: 0.018915, Feat: 0.380510) | LR: 9.05e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9020 dB | Avg SSIM: 0.88960 | Feature Loss: 0.362144
+
+--> New best PSNR performance: 31.9020 dB! Saving best weight checkpoint...
+
+Iter [15000/200000] | Loss: 0.037573 (Rec: 0.018751, Feat: 0.376434) | LR: 7.94e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.7588 dB | Avg SSIM: 0.88795 | Feature Loss: 0.358641
+
+Iter [20000/200000] | Loss: 0.037352 (Rec: 0.018709, Feat: 0.372859) | LR: 6.55e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9633 dB | Avg SSIM: 0.89199 | Feature Loss: 0.354374
+
+--> New best PSNR performance: 31.9633 dB! Saving best weight checkpoint...
+
+Iter [25000/200000] | Loss: 0.037143 (Rec: 0.018623, Feat: 0.370398) | LR: 5.00e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9098 dB | Avg SSIM: 0.89078 | Feature Loss: 0.353761
+
+Iter [30000/200000] | Loss: 0.036948 (Rec: 0.018561, Feat: 0.367726) | LR: 3.46e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9181 dB | Avg SSIM: 0.89110 | Feature Loss: 0.351522
+
+Iter [35000/200000] | Loss: 0.036791 (Rec: 0.018506, Feat: 0.365690) | LR: 2.06e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9280 dB | Avg SSIM: 0.89181 | Feature Loss: 0.348851
+
+Iter [40000/200000] | Loss: 0.036651 (Rec: 0.018450, Feat: 0.364026) | LR: 9.56e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0716 dB | Avg SSIM: 0.89377 | Feature Loss: 0.348856
+
+--> New best PSNR performance: 32.0716 dB! Saving best weight checkpoint...
+
+Iter [45000/200000] | Loss: 0.036596 (Rec: 0.018438, Feat: 0.363170) | LR: 2.46e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0123 dB | Avg SSIM: 0.89320 | Feature Loss: 0.346970
+
+Iter [50000/200000] | Loss: 0.036534 (Rec: 0.018404, Feat: 0.362599) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0128 dB | Avg SSIM: 0.89206 | Feature Loss: 0.347956
+
+Iter [55000/200000] | Loss: 0.036834 (Rec: 0.018523, Feat: 0.366209) | LR: 4.88e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0132 dB | Avg SSIM: 0.89217 | Feature Loss: 0.351538
+
+Iter [60000/200000] | Loss: 0.036819 (Rec: 0.018538, Feat: 0.365625) | LR: 4.52e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9208 dB | Avg SSIM: 0.89078 | Feature Loss: 0.350239
+
+Iter [65000/200000] | Loss: 0.036675 (Rec: 0.018452, Feat: 0.364452) | LR: 3.97e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9891 dB | Avg SSIM: 0.89289 | Feature Loss: 0.350917
+
+Iter [70000/200000] | Loss: 0.036637 (Rec: 0.018483, Feat: 0.363085) | LR: 3.27e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9953 dB | Avg SSIM: 0.89257 | Feature Loss: 0.347974
+
+Iter [75000/200000] | Loss: 0.036532 (Rec: 0.018417, Feat: 0.362291) | LR: 2.50e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9408 dB | Avg SSIM: 0.89220 | Feature Loss: 0.346867
+
+Iter [80000/200000] | Loss: 0.036437 (Rec: 0.018392, Feat: 0.360901) | LR: 1.73e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0005 dB | Avg SSIM: 0.89238 | Feature Loss: 0.345947
+
+Iter [85000/200000] | Loss: 0.036350 (Rec: 0.018365, Feat: 0.359694) | LR: 1.03e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0740 dB | Avg SSIM: 0.89366 | Feature Loss: 0.345978
+
+--> New best PSNR performance: 32.0740 dB! Saving best weight checkpoint...
+
+Iter [90000/200000] | Loss: 0.036286 (Rec: 0.018333, Feat: 0.359048) | LR: 4.78e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0201 dB | Avg SSIM: 0.89300 | Feature Loss: 0.344921
+
+Iter [95000/200000] | Loss: 0.036228 (Rec: 0.018318, Feat: 0.358205) | LR: 1.23e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9980 dB | Avg SSIM: 0.89300 | Feature Loss: 0.343888
+
+Iter [100000/200000] | Loss: 0.036244 (Rec: 0.018333, Feat: 0.358228) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0206 dB | Avg SSIM: 0.89337 | Feature Loss: 0.344201
+
+Iter [105000/200000] | Loss: 0.036580 (Rec: 0.018449, Feat: 0.362628) | LR: 4.88e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0884 dB | Avg SSIM: 0.89422 | Feature Loss: 0.348618
+
+--> New best PSNR performance: 32.0884 dB! Saving best weight checkpoint...
+
+Iter [110000/200000] | Loss: 0.036496 (Rec: 0.018386, Feat: 0.362203) | LR: 4.52e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0290 dB | Avg SSIM: 0.89361 | Feature Loss: 0.345777
+
+Iter [115000/200000] | Loss: 0.036473 (Rec: 0.018400, Feat: 0.361461) | LR: 3.97e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9464 dB | Avg SSIM: 0.89125 | Feature Loss: 0.347251
+
+Iter [120000/200000] | Loss: 0.036418 (Rec: 0.018374, Feat: 0.360887) | LR: 3.27e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9535 dB | Avg SSIM: 0.89196 | Feature Loss: 0.346269
+
+Iter [125000/200000] | Loss: 0.036340 (Rec: 0.018360, Feat: 0.359606) | LR: 2.50e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0925 dB | Avg SSIM: 0.89432 | Feature Loss: 0.343214
+
+--> New best PSNR performance: 32.0925 dB! Saving best weight checkpoint...
+
+Iter [130000/200000] | Loss: 0.036284 (Rec: 0.018356, Feat: 0.358559) | LR: 1.73e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9784 dB | Avg SSIM: 0.89338 | Feature Loss: 0.343449
+
+Iter [135000/200000] | Loss: 0.036194 (Rec: 0.018309, Feat: 0.357692) | LR: 1.03e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0226 dB | Avg SSIM: 0.89320 | Feature Loss: 0.342778
+
+Iter [140000/200000] | Loss: 0.036123 (Rec: 0.018298, Feat: 0.356489) | LR: 4.78e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0724 dB | Avg SSIM: 0.89384 | Feature Loss: 0.342821
+
+Iter [145000/200000] | Loss: 0.036070 (Rec: 0.018275, Feat: 0.355917) | LR: 1.23e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0991 dB | Avg SSIM: 0.89403 | Feature Loss: 0.343119
+
+--> New best PSNR performance: 32.0991 dB! Saving best weight checkpoint...
+
+Iter [150000/200000] | Loss: 0.036059 (Rec: 0.018265, Feat: 0.355883) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0920 dB | Avg SSIM: 0.89444 | Feature Loss: 0.341484
+
+Iter [155000/200000] | Loss: 0.036436 (Rec: 0.018395, Feat: 0.360812) | LR: 4.88e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9741 dB | Avg SSIM: 0.89176 | Feature Loss: 0.347589
+
+Iter [160000/200000] | Loss: 0.036383 (Rec: 0.018354, Feat: 0.360581) | LR: 4.52e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.1001 dB | Avg SSIM: 0.89407 | Feature Loss: 0.345338
+
+--> New best PSNR performance: 32.1001 dB! Saving best weight checkpoint...
+
+Iter [165000/200000] | Loss: 0.036359 (Rec: 0.018361, Feat: 0.359961) | LR: 3.97e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.9682 dB | Avg SSIM: 0.89269 | Feature Loss: 0.345041
+
+Iter [170000/200000] | Loss: 0.036316 (Rec: 0.018365, Feat: 0.359016) | LR: 3.27e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0355 dB | Avg SSIM: 0.89355 | Feature Loss: 0.344173
+
+Iter [175000/200000] | Loss: 0.036209 (Rec: 0.018317, Feat: 0.357833) | LR: 2.50e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0551 dB | Avg SSIM: 0.89427 | Feature Loss: 0.343338
+
+Iter [180000/200000] | Loss: 0.036127 (Rec: 0.018281, Feat: 0.356916) | LR: 1.73e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0607 dB | Avg SSIM: 0.89324 | Feature Loss: 0.343769
+
+Iter [185000/200000] | Loss: 0.036056 (Rec: 0.018270, Feat: 0.355707) | LR: 1.03e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.1221 dB | Avg SSIM: 0.89473 | Feature Loss: 0.340521
+
+--> New best PSNR performance: 32.1221 dB! Saving best weight checkpoint...
+
+Iter [190000/200000] | Loss: 0.036025 (Rec: 0.018241, Feat: 0.355681) | LR: 4.78e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0731 dB | Avg SSIM: 0.89390 | Feature Loss: 0.341694
+
+Iter [195000/200000] | Loss: 0.036012 (Rec: 0.018266, Feat: 0.354919) | LR: 1.23e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0014 dB | Avg SSIM: 0.89316 | Feature Loss: 0.341126
+
+Iter [200000/200000] | Loss: 0.035966 (Rec: 0.018242, Feat: 0.354476) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 32.0806 dB | Avg SSIM: 0.89421 | Feature Loss: 0.341532
+
+=== Training Session Finished ===

@@ -1,0 +1,300 @@
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet/train_MOT20_QP37_combined.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+Get-or-create Comet experiment with fixed key: a1a88339d8c24c32967e056c321a05ee
+
+Comet ML logging initialized successfully.
+
+Using GPU device: NVIDIA RTX 2000 Ada Generation
+Overall loss configuration type: combined
+Initializing datasets...
+Initializing NAFNet model...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP37_combined
+CosineAnnealingRestartLR Scheduler initialized.
+Loading frozen YOLO model for detection loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO model for detection loss prepped successfully.
+Loading frozen YOLO model for feature loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO Feature Loss prepped successfully.
+Starting training: start_epoch=1, total_epochs=224, iterations_per_epoch=893
+
+Iter [5000/200000] | Loss: 0.381209 (Rec: 0.019639, YOLO: 33.784339, Feat: 0.474521) | LR: 9.76e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.0205 dB | Avg SSIM: 0.90741 | mAP@50: 0.64345 | Feature Loss: 0.436431
+
+--> New best mAP@50 performance: 0.64345! Saving best weight checkpoint...
+
+Iter [10000/200000] | Loss: 0.359011 (Rec: 0.022643, YOLO: 31.028882, Feat: 0.521591) | LR: 9.05e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.3905 dB | Avg SSIM: 0.90772 | mAP@50: 0.65932 | Feature Loss: 0.411861
+
+--> New best mAP@50 performance: 0.65932! Saving best weight checkpoint...
+
+Iter [15000/200000] | Loss: 0.345101 (Rec: 0.022838, YOLO: 29.593365, Feat: 0.526580) | LR: 7.94e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.3947 dB | Avg SSIM: 0.91360 | mAP@50: 0.67782 | Feature Loss: 0.408765
+
+--> New best mAP@50 performance: 0.67782! Saving best weight checkpoint...
+
+Iter [20000/200000] | Loss: 0.336396 (Rec: 0.022904, YOLO: 28.701325, Feat: 0.529574) | LR: 6.55e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.5669 dB | Avg SSIM: 0.91240 | mAP@50: 0.66944 | Feature Loss: 0.416251
+
+Iter [25000/200000] | Loss: 0.328407 (Rec: 0.022952, YOLO: 27.889969, Feat: 0.531096) | LR: 5.00e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.5797 dB | Avg SSIM: 0.91331 | mAP@50: 0.67985 | Feature Loss: 0.407741
+
+--> New best mAP@50 performance: 0.67985! Saving best weight checkpoint...
+
+Iter [30000/200000] | Loss: 0.319298 (Rec: 0.022847, YOLO: 26.991237, Feat: 0.530776) | LR: 3.46e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.2556 dB | Avg SSIM: 0.91223 | mAP@50: 0.67214 | Feature Loss: 0.404984
+
+Iter [35000/200000] | Loss: 0.312574 (Rec: 0.022778, YOLO: 26.324263, Feat: 0.531070) | LR: 2.06e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.4607 dB | Avg SSIM: 0.91341 | mAP@50: 0.67545 | Feature Loss: 0.400616
+
+Iter [40000/200000] | Loss: 0.304618 (Rec: 0.022719, YOLO: 25.553488, Feat: 0.527289) | LR: 9.56e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.6836 dB | Avg SSIM: 0.91583 | mAP@50: 0.67498 | Feature Loss: 0.402593
+
+Iter [45000/200000] | Loss: 0.301534 (Rec: 0.022742, YOLO: 25.234565, Feat: 0.528931) | LR: 2.46e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.5791 dB | Avg SSIM: 0.91495 | mAP@50: 0.68170 | Feature Loss: 0.403335
+
+--> New best mAP@50 performance: 0.68170! Saving best weight checkpoint...
+
+Iter [50000/200000] | Loss: 0.297932 (Rec: 0.022606, YOLO: 24.895863, Feat: 0.527352) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.6161 dB | Avg SSIM: 0.91431 | mAP@50: 0.67317 | Feature Loss: 0.402556
+
+Iter [55000/200000] | Loss: 0.310656 (Rec: 0.023216, YOLO: 26.100981, Feat: 0.528594) | LR: 4.88e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.5620 dB | Avg SSIM: 0.91432 | mAP@50: 0.67045 | Feature Loss: 0.404075
+
+Iter [60000/200000] | Loss: 0.307283 (Rec: 0.023288, YOLO: 25.760234, Feat: 0.527855) | LR: 4.52e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.5281 dB | Avg SSIM: 0.91337 | mAP@50: 0.68415 | Feature Loss: 0.402879
+
+--> New best mAP@50 performance: 0.68415! Saving best weight checkpoint...
+
+Iter [65000/200000] | Loss: 0.303183 (Rec: 0.023162, YOLO: 25.366151, Feat: 0.527182) | LR: 3.97e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.4030 dB | Avg SSIM: 0.91157 | mAP@50: 0.67604 | Feature Loss: 0.403080
+
+Iter [70000/200000] | Loss: 0.298465 (Rec: 0.023509, YOLO: 24.850849, Feat: 0.528944) | LR: 3.27e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.2215 dB | Avg SSIM: 0.90956 | mAP@50: 0.67104 | Feature Loss: 0.407500
+
+Iter [75000/200000] | Loss: 0.291677 (Rec: 0.023558, YOLO: 24.159970, Feat: 0.530388) | LR: 2.50e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.3595 dB | Avg SSIM: 0.91059 | mAP@50: 0.67124 | Feature Loss: 0.409896
+
+Iter [80000/200000] | Loss: 0.284959 (Rec: 0.023494, YOLO: 23.499548, Feat: 0.529379) | LR: 1.73e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.7734 dB | Avg SSIM: 0.91584 | mAP@50: 0.68916 | Feature Loss: 0.396531
+
+--> New best mAP@50 performance: 0.68916! Saving best weight checkpoint...
+
+Iter [85000/200000] | Loss: 0.279967 (Rec: 0.023503, YOLO: 23.001029, Feat: 0.529070) | LR: 1.03e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8860 dB | Avg SSIM: 0.91817 | mAP@50: 0.69142 | Feature Loss: 0.389339
+
+--> New best mAP@50 performance: 0.69142! Saving best weight checkpoint...
+
+Iter [90000/200000] | Loss: 0.276945 (Rec: 0.023454, YOLO: 22.698824, Feat: 0.530058) | LR: 4.78e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.7953 dB | Avg SSIM: 0.91696 | mAP@50: 0.68558 | Feature Loss: 0.398165
+
+Iter [95000/200000] | Loss: 0.273351 (Rec: 0.023252, YOLO: 22.366825, Feat: 0.528614) | LR: 1.23e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8080 dB | Avg SSIM: 0.91787 | mAP@50: 0.68310 | Feature Loss: 0.392555
+
+Iter [100000/200000] | Loss: 0.273641 (Rec: 0.023270, YOLO: 22.392257, Feat: 0.528959) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8016 dB | Avg SSIM: 0.91765 | mAP@50: 0.70083 | Feature Loss: 0.392967
+
+--> New best mAP@50 performance: 0.70083! Saving best weight checkpoint...
+
+Iter [105000/200000] | Loss: 0.288068 (Rec: 0.023824, YOLO: 23.781736, Feat: 0.528527) | LR: 4.88e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.9141 dB | Avg SSIM: 0.91895 | mAP@50: 0.70572 | Feature Loss: 0.389897
+
+--> New best mAP@50 performance: 0.70572! Saving best weight checkpoint...
+
+Iter [110000/200000] | Loss: 0.285739 (Rec: 0.023820, YOLO: 23.537787, Feat: 0.530818) | LR: 4.52e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8661 dB | Avg SSIM: 0.91991 | mAP@50: 0.68290 | Feature Loss: 0.389682
+
+Iter [115000/200000] | Loss: 0.281988 (Rec: 0.023792, YOLO: 23.165272, Feat: 0.530869) | LR: 3.97e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8522 dB | Avg SSIM: 0.92068 | mAP@50: 0.70030 | Feature Loss: 0.393588
+
+Iter [120000/200000] | Loss: 0.277556 (Rec: 0.023802, YOLO: 22.717321, Feat: 0.531618) | LR: 3.27e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.5600 dB | Avg SSIM: 0.91400 | mAP@50: 0.69298 | Feature Loss: 0.393643
+
+Iter [125000/200000] | Loss: 0.273937 (Rec: 0.023583, YOLO: 22.390905, Feat: 0.528901) | LR: 2.50e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8899 dB | Avg SSIM: 0.91838 | mAP@50: 0.69123 | Feature Loss: 0.392060
+
+Iter [130000/200000] | Loss: 0.269646 (Rec: 0.023583, YOLO: 21.958662, Feat: 0.529523) | LR: 1.73e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8758 dB | Avg SSIM: 0.91912 | mAP@50: 0.69457 | Feature Loss: 0.388185
+
+Iter [135000/200000] | Loss: 0.265000 (Rec: 0.023356, YOLO: 21.523351, Feat: 0.528211) | LR: 1.03e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.9180 dB | Avg SSIM: 0.91968 | mAP@50: 0.70922 | Feature Loss: 0.390046
+
+--> New best mAP@50 performance: 0.70922! Saving best weight checkpoint...
+
+Iter [140000/200000] | Loss: 0.261671 (Rec: 0.023225, YOLO: 21.206231, Feat: 0.527661) | LR: 4.78e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.9199 dB | Avg SSIM: 0.91853 | mAP@50: 0.71114 | Feature Loss: 0.389297
+
+--> New best mAP@50 performance: 0.71114! Saving best weight checkpoint...
+
+Iter [145000/200000] | Loss: 0.259474 (Rec: 0.023113, YOLO: 21.001601, Feat: 0.526910) | LR: 1.23e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8873 dB | Avg SSIM: 0.91828 | mAP@50: 0.71460 | Feature Loss: 0.392453
+
+--> New best mAP@50 performance: 0.71460! Saving best weight checkpoint...
+
+Iter [150000/200000] | Loss: 0.260420 (Rec: 0.023131, YOLO: 21.090054, Feat: 0.527772) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8989 dB | Avg SSIM: 0.91865 | mAP@50: 0.70988 | Feature Loss: 0.390202
+
+Iter [155000/200000] | Loss: 0.274969 (Rec: 0.023854, YOLO: 22.461358, Feat: 0.530022) | LR: 4.88e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8516 dB | Avg SSIM: 0.91934 | mAP@50: 0.69828 | Feature Loss: 0.385868
+
+Iter [160000/200000] | Loss: 0.274146 (Rec: 0.023729, YOLO: 22.397048, Feat: 0.528939) | LR: 4.52e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.7779 dB | Avg SSIM: 0.91701 | mAP@50: 0.69967 | Feature Loss: 0.395188
+
+Iter [165000/200000] | Loss: 0.271082 (Rec: 0.023762, YOLO: 22.082392, Feat: 0.529926) | LR: 3.97e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.5759 dB | Avg SSIM: 0.91374 | mAP@50: 0.68693 | Feature Loss: 0.393438
+
+Iter [170000/200000] | Loss: 0.268247 (Rec: 0.023644, YOLO: 21.814211, Feat: 0.529217) | LR: 3.27e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.7979 dB | Avg SSIM: 0.91798 | mAP@50: 0.71044 | Feature Loss: 0.386707
+
+Iter [175000/200000] | Loss: 0.264581 (Rec: 0.023513, YOLO: 21.461037, Feat: 0.529134) | LR: 2.50e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.6001 dB | Avg SSIM: 0.91434 | mAP@50: 0.70270 | Feature Loss: 0.398198
+
+Iter [180000/200000] | Loss: 0.261738 (Rec: 0.023333, YOLO: 21.197174, Feat: 0.528673) | LR: 1.73e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.9137 dB | Avg SSIM: 0.91883 | mAP@50: 0.70248 | Feature Loss: 0.396167
+
+Iter [185000/200000] | Loss: 0.257808 (Rec: 0.023261, YOLO: 20.814357, Feat: 0.528071) | LR: 1.03e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.9425 dB | Avg SSIM: 0.91885 | mAP@50: 0.71252 | Feature Loss: 0.389498
+
+Iter [190000/200000] | Loss: 0.255047 (Rec: 0.023056, YOLO: 20.563106, Feat: 0.527198) | LR: 4.78e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8084 dB | Avg SSIM: 0.91678 | mAP@50: 0.72108 | Feature Loss: 0.390227
+
+--> New best mAP@50 performance: 0.72108! Saving best weight checkpoint...
+
+Iter [195000/200000] | Loss: 0.253367 (Rec: 0.023118, YOLO: 20.386519, Feat: 0.527673) | LR: 1.23e-05
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.8377 dB | Avg SSIM: 0.91801 | mAP@50: 0.70263 | Feature Loss: 0.390568
+
+Iter [200000/200000] | Loss: 0.252842 (Rec: 0.023070, YOLO: 20.341388, Feat: 0.527158) | LR: 1.00e-07
+
+Running validation loop...
+
+Validation | Avg PSNR: 33.9256 dB | Avg SSIM: 0.91848 | mAP@50: 0.71238 | Feature Loss: 0.389500
+
+=== Training Session Finished ===
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet/train_MOT20_QP37_combined.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+Get-or-create Comet experiment with fixed key: a1a88339d8c24c32967e056c321a05ee
+
+Comet ML logging initialized successfully.
+
+Using GPU device: NVIDIA RTX 2000 Ada Generation
+Overall loss configuration type: combined
+Initializing datasets...
