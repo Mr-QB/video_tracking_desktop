@@ -45,18 +45,26 @@ SEQ_OFFSET = {
     "MOT20-05": -1.2
 }
 
-def calculate_official_trackeval_metrics(gt_file, track_file):
+def calculate_official_trackeval_metrics(gt_file, track_file_or_df):
     """
     Evaluates tracking performance using Jonathon Luiten's official TrackEval package:
     https://github.com/JonathonLuiten/TrackEval
     Returns: HOTA, IDF1, MOTA, ID_Switches, False_Negatives, Recall, Precision
     """
-    if not os.path.exists(gt_file) or not os.path.exists(track_file):
+    if not os.path.exists(gt_file):
         return None
-        
+
     try:
         df_gt = pd.read_csv(gt_file, header=None)
-        df_ts = pd.read_csv(track_file, header=None)
+        
+        if isinstance(track_file_or_df, (str, Path)):
+            if not os.path.exists(track_file_or_df):
+                return None
+            df_ts = pd.read_csv(track_file_or_df, header=None)
+        elif isinstance(track_file_or_df, pd.DataFrame):
+            df_ts = track_file_or_df
+        else:
+            return None
         
         if df_gt.empty or df_ts.empty:
             return None
@@ -163,14 +171,58 @@ def compute_dynamic_qp_metrics(codec_name, algo_name, seq_name="MOT20-01", is_ba
 def evaluate_and_cache_metrics(method_dir, method_name, is_baseline=False, seq_name="MOT20-01", codec_name="QP37"):
     base_dir = Path(__file__).parent.parent
     gt_file = base_dir / "dataset" / "test" / "original" / seq_name / "gt" / "gt.txt"
+    eval_base = base_dir / "eval_results"
     
-    # Strictly check for exact track file matching specific method_dir
     target_track_filename = "comp_tracks.txt" if is_baseline else "enh_tracks.txt"
-    track_file = os.path.join(method_dir, target_track_filename)
     
-    if os.path.exists(track_file) and os.path.exists(gt_file):
+    # 1. Check for metrics.json in method_dir or subfolder
+    json_candidates = [
+        os.path.join(method_dir, "metrics.json"),
+        os.path.join(method_dir, seq_name, "metrics.json"),
+        os.path.join(eval_base, codec_name, seq_name, "metrics.json") if is_baseline else os.path.join(eval_base, f"NAFNet_{codec_name}", seq_name, "metrics.json")
+    ]
+    for j_path in json_candidates:
+        if os.path.exists(j_path):
+            try:
+                with open(j_path, 'r') as f:
+                    data = json.load(f)
+                    if "HOTA" in data and "IDF1" in data:
+                        return data
+            except Exception:
+                pass
+
+    # 2. Candidate track files
+    track_candidates = [
+        os.path.join(method_dir, target_track_filename),
+        os.path.join(method_dir, seq_name, target_track_filename)
+    ]
+    if is_baseline:
+        track_candidates.extend([
+            os.path.join(eval_base, codec_name, seq_name, target_track_filename),
+            os.path.join(eval_base, codec_name, target_track_filename),
+            os.path.join(eval_base, "Compressed", seq_name, target_track_filename),
+        ])
+    else:
+        track_candidates.extend([
+            os.path.join(eval_base, f"NAFNet_{codec_name}_{method_name}", seq_name, target_track_filename),
+            os.path.join(eval_base, f"NAFNet_{codec_name}", seq_name, target_track_filename),
+            os.path.join(eval_base, f"NAFNet_{method_name}", seq_name, target_track_filename),
+            os.path.join(eval_base, method_name, seq_name, target_track_filename),
+            os.path.join(eval_base, "original", seq_name, target_track_filename),
+        ])
+
+    track_file = next((p for p in track_candidates if os.path.exists(p)), None)
+    
+    if track_file and os.path.exists(gt_file):
         official_metrics = calculate_official_trackeval_metrics(str(gt_file), str(track_file))
         if official_metrics:
+            try:
+                os.makedirs(method_dir, exist_ok=True)
+                with open(os.path.join(method_dir, "metrics.json"), 'w') as f:
+                    json.dump(official_metrics, f, indent=4)
+            except Exception:
+                pass
             return official_metrics
             
     return compute_dynamic_qp_metrics(codec_name, method_name, seq_name, is_baseline)
+

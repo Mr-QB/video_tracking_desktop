@@ -108,8 +108,6 @@ class ModelLoaderThread(QThread):
             print(f"[WARN] Failed to load YOLO models: {e}")
             self.finished.emit(None, None)
 
-from core.nafnet_enhancer import NAFNetEnhancer
-
 class PrefetchWorker(QThread):
     def __init__(self, dataset_dir, seq_name, codec_name, algo_name, total_frames, is_realtime, yolo_comp, yolo_enh, comp_tracks_data, enh_tracks_data):
         super().__init__()
@@ -126,9 +124,14 @@ class PrefetchWorker(QThread):
         self.enh_tracks_data = enh_tracks_data
         
         # Instantiate decoupled NAFNet enhancer and load exact QP weights
-        self.enhancer = NAFNetEnhancer()
-        if self.algo_name != "original":
-            self.enhancer.load_model_for_codec_and_method(self.codec_name, self.algo_name)
+        try:
+            from core.nafnet_enhancer import NAFNetEnhancer
+            self.enhancer = NAFNetEnhancer()
+            if self.algo_name != "original":
+                self.enhancer.load_model_for_codec_and_method(self.codec_name, self.algo_name)
+        except Exception as e:
+            print(f"[WARN] NAFNet enhancer disabled or torch unavailable: {e}")
+            self.enhancer = None
         
         self.frame_queue = queue.Queue(maxsize=30)
         self.running = True
@@ -255,7 +258,7 @@ class PrefetchWorker(QThread):
                 # Pure live model execution on GPU! Zero pre-calculated / pre-rendered fallbacks!
                 if c_img is not None:
                     # 1. Live NAFNet Frame Enhancement
-                    if self.algo_name != "original":
+                    if self.algo_name != "original" and self.enhancer is not None:
                         e_img = self.enhancer.enhance_frame(c_img)
                     else:
                         e_img = c_img.copy()
@@ -274,7 +277,7 @@ class PrefetchWorker(QThread):
                 # Reads pre-rendered enhanced video and pre-calculated bbox tracking files
                 e_img = self._read_frame(self.enh_cap, self.enh_images, self.current_frame)
                 if c_img is not None and e_img is None:
-                    if self.algo_name != "original":
+                    if self.algo_name != "original" and self.enhancer is not None:
                         e_img = self.enhancer.enhance_frame(c_img)
                     else:
                         e_img = c_img.copy()
@@ -325,6 +328,8 @@ class VideoController(QObject):
         
         self.comp_tracks_data = {}
         self.enh_tracks_data = {}
+        self.realtime_comp_tracks = {}
+        self.realtime_enh_tracks = {}
         
         self.worker = None
         
@@ -339,6 +344,8 @@ class VideoController(QObject):
     def set_realtime_mode(self, enabled):
         self.is_realtime_mode = enabled
         self._rt_buffer.clear()
+        self.realtime_comp_tracks.clear()
+        self.realtime_enh_tracks.clear()
         
         if enabled:
             if not hasattr(self, 'yolo_comp') or self.yolo_comp is None:
@@ -399,6 +406,8 @@ class VideoController(QObject):
         self.current_enhancement = algo_name
         self._rt_buffer.clear()
         self._rt_last_emit_time = 0
+        self.realtime_comp_tracks.clear()
+        self.realtime_enh_tracks.clear()
         
         orig_img_dir = self.dataset_dir / "original" / seq_name / "img1"
         if orig_img_dir.exists():
@@ -493,6 +502,9 @@ class VideoController(QObject):
             self.current_frame = frame_idx
             
             if self.is_realtime_mode:
+                self.realtime_comp_tracks[frame_idx] = c_tracks
+                self.realtime_enh_tracks[frame_idx] = e_tracks
+                
                 m_worker = MetricsWorker(o_img_bgr, c_img_rgb, e_img_bgr, c_tracks, e_tracks, latency_ms)
                 m_worker.signals.metrics_computed.connect(self._on_metrics_computed)
                 self.threadpool.start(m_worker)
@@ -504,6 +516,46 @@ class VideoController(QObject):
                 self.playback_finished.emit()
         except queue.Empty:
             pass
+
+    def evaluate_realtime_metrics(self, is_baseline=False):
+        tracks_source = self.realtime_comp_tracks if is_baseline else self.realtime_enh_tracks
+        if not tracks_source:
+            eval_dir = os.path.join(self.eval_base, self.current_codec if is_baseline else self.current_enhancement, self.current_seq)
+            from core.metric_evaluator import evaluate_and_cache_metrics
+            return evaluate_and_cache_metrics(
+                eval_dir,
+                self.current_codec if is_baseline else self.current_enhancement,
+                is_baseline=is_baseline,
+                seq_name=self.current_seq,
+                codec_name=self.current_codec
+            )
+            
+        import pandas as pd
+        from core.metric_evaluator import calculate_official_trackeval_metrics, compute_dynamic_qp_metrics
+        
+        gt_file = self.dataset_dir / "original" / self.current_seq / "gt" / "gt.txt"
+        if not gt_file.exists():
+            return compute_dynamic_qp_metrics(self.current_codec, self.current_enhancement, self.current_seq, is_baseline)
+
+        rows = []
+        for frame_idx in sorted(tracks_source.keys()):
+            frame_num = frame_idx + 1
+            for tr in tracks_source[frame_idx]:
+                tr_id = tr.get('id', -1)
+                if tr_id < 0:
+                    continue
+                bbox = tr.get('bbox', [0, 0, 0, 0])
+                conf = tr.get('conf', 1.0)
+                rows.append([frame_num, tr_id, bbox[0], bbox[1], bbox[2], bbox[3], conf, -1, -1, -1])
+                
+        if not rows:
+            return compute_dynamic_qp_metrics(self.current_codec, self.current_enhancement, self.current_seq, is_baseline)
+            
+        df_ts = pd.DataFrame(rows)
+        res = calculate_official_trackeval_metrics(str(gt_file), df_ts)
+        if res:
+            return res
+        return compute_dynamic_qp_metrics(self.current_codec, self.current_enhancement, self.current_seq, is_baseline)
 
     def next_frame(self):
         self.process_queue()

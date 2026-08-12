@@ -217,29 +217,18 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(12, 6, 12, 6)
         layout.setSpacing(12)
 
-        # Read available algorithms from models/MOT20 and eval_results directory
-        algorithms = ["original"]
+        # Read available enhancement model algorithms exclusively from models/MOT20
         extracted_methods = set()
-        
         models_mot20_dir = Path(__file__).parent.parent / "models" / "MOT20"
         if models_mot20_dir.exists():
             for d in os.listdir(models_mot20_dir):
-                if d.startswith("NAFNet_"):
+                if d.startswith("NAFNet_") and os.path.isdir(models_mot20_dir / d):
                     parts = d.split("_")
                     if len(parts) > 2:
                         suffix = "_".join(parts[2:])
                         extracted_methods.add(suffix)
-                        
-        eval_base_dir = APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results")
-        if os.path.exists(eval_base_dir):
-            for d in os.listdir(eval_base_dir):
-                if os.path.isdir(os.path.join(eval_base_dir, d)) and d not in ["Compressed", "original"] and not d.startswith("QP"):
-                    clean_d = d.replace("NAFNet_", "").replace("QP51", "").replace("QP47", "").replace("QP42", "").replace("QP37", "").strip("_")
-                    if clean_d:
-                        extracted_methods.add(clean_d)
-                    else:
-                        extracted_methods.add(d)
 
+        algorithms = []
         # Standard ordered list of NAFNet suffixes
         standard_order = ["combined", "feature_loss", "p_r", "p_r_feature_loss", "perception", "sideinfo", "sideinfo_feature_loss"]
         for m in standard_order:
@@ -249,6 +238,9 @@ class MainWindow(QMainWindow):
                 
         for m in sorted(list(extracted_methods)):
             algorithms.append(m)
+
+        if not algorithms:
+            algorithms = ["combined"]
         
         # Read available codecs from the dataset/test directory
         dataset_dir = APP_CONFIG.get("paths", {}).get("dataset_images_dir", "")
@@ -518,21 +510,28 @@ class MainWindow(QMainWindow):
             self._update_all_metrics()
 
     def _update_all_metrics(self):
-        comp_metrics = evaluate_and_cache_metrics(
-            os.path.join(self.video_controller.eval_base, self.video_controller.current_codec),
-            self.video_controller.current_codec,
-            is_baseline=True
-        )
-        enh_metrics = evaluate_and_cache_metrics(
-            os.path.join(self.video_controller.eval_base, self.video_controller.current_enhancement),
-            self.video_controller.current_enhancement,
-            is_baseline=False
-        )
+        if getattr(self.video_controller, 'is_realtime_mode', False):
+            comp_metrics = self.video_controller.evaluate_realtime_metrics(is_baseline=True)
+            enh_metrics = self.video_controller.evaluate_realtime_metrics(is_baseline=False)
+        else:
+            seq_name = self.video_controller.current_seq
+            codec_name = self.video_controller.current_codec
+            algo_name = self.video_controller.current_enhancement
+            eval_base = APP_CONFIG.get("paths", {}).get("eval_results_dir", "D:/Dev/LAB_RESEARCH_PROJECT/NAFOSTED/eval_results")
+            
+            comp_dir = os.path.join(eval_base, codec_name, seq_name)
+            enh_dir = os.path.join(eval_base, "original", seq_name) if algo_name == "original" else os.path.join(eval_base, f"NAFNet_{codec_name}_{algo_name}", seq_name)
+            
+            comp_metrics = evaluate_and_cache_metrics(comp_dir, codec_name, is_baseline=True, seq_name=seq_name, codec_name=codec_name)
+            enh_metrics = evaluate_and_cache_metrics(enh_dir, algo_name, is_baseline=False, seq_name=seq_name, codec_name=codec_name)
+            
         self.metric_dashboard.update_tracking_metrics(comp_metrics, enh_metrics)
+        self.tracking_chart.update_bar_chart(comp_metrics, enh_metrics)
         
         # Quality metrics vs Original for offline: Comp vs Orig -> Enh vs Orig
-        self.metric_dashboard.update_quality_metrics(28.4, 35.2, 0.865, 0.965)
-        self.metric_dashboard.update_runtime_metrics(21.4, 46.3)
+        if not getattr(self.video_controller, 'is_realtime_mode', False):
+            self.metric_dashboard.update_quality_metrics(28.4, 35.2, 0.865, 0.965)
+            self.metric_dashboard.update_runtime_metrics(21.4, 46.3)
 
     def toggle_play(self):
         self.video_controller.toggle_play_pause()
