@@ -1,0 +1,35 @@
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet/train_MOT20_QP37_combined.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+Get-or-create Comet experiment with fixed key: e1a02f4ca9731f6b903b9f11429babcd
+
+Comet ML logging initialized successfully.
+
+Using GPU device: NVIDIA RTX 2000 Ada Generation
+Using both YOLO detection loss and YOLO Feature Loss simultaneously.
+Initializing datasets...
+Initializing NAFNet model...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP37_combined
+No LR Scheduler active (or dry-run).
+Loading frozen YOLO model for detection loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO model for detection loss prepped successfully.
+Loading frozen YOLO model for feature loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO Feature Loss prepped successfully.
+Starting training: start_epoch=1, total_epochs=1, iterations_per_epoch=3572
+
+Iter [1/5] | Loss: 0.274835 (Rec: 0.137403, YOLO: 8.343733, Feat: 1.079902) | LR: 1.00e-03
+
+Iter [2/5] | Loss: 0.389597 (Rec: 0.173801, YOLO: 15.760442, Feat: 1.163822) | LR: 1.00e-03
+
+Iter [3/5] | Loss: 0.301504 (Rec: 0.166916, YOLO: 7.470712, Feat: 1.197611) | LR: 1.00e-03
+
+Iter [4/5] | Loss: 0.307484 (Rec: 0.119544, YOLO: 12.670074, Feat: 1.224798) | LR: 1.00e-03
+
+Iter [5/5] | Loss: 0.284678 (Rec: 0.107171, YOLO: 12.163971, Feat: 1.117338) | LR: 1.00e-03
+
+Running validation loop...
+
+Validation | Avg PSNR: 15.9966 dB | Avg SSIM: 0.61483 | mAP@50: 0.00000 | Feature Loss: 0.993152
+
+=== Training Session Finished ===

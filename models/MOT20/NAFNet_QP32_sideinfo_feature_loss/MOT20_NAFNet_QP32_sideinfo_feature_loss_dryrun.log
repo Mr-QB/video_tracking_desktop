@@ -1,0 +1,62 @@
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet_sideinfo/train_MOT20_QP32_feature_loss.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+CUDA is unavailable; using CPU with AMP disabled.
+Overall loss configuration type: feature
+Initializing datasets...
+Using MOT20SideInfoDataset for train.
+Using MOT20SideInfoDataset for test.
+Initializing attention-fused NAFNetSideInfo model...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP32_sideinfo_feature_loss
+No LR Scheduler active (or dry-run).
+Loading frozen YOLO model for feature loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO Feature Loss prepped successfully.
+Starting training: start_epoch=1, total_epochs=1, iterations_per_epoch=3572
+
+Iter [1/5] | Loss: 0.092894 (Rec: 0.042343, Feat: 1.011009) | LR: 1.00e-04
+
+Iter [2/5] | Loss: 0.091957 (Rec: 0.043101, Feat: 0.977120) | LR: 1.00e-04
+
+Iter [3/5] | Loss: 0.088584 (Rec: 0.041300, Feat: 0.945673) | LR: 1.00e-04
+
+Iter [4/5] | Loss: 0.086407 (Rec: 0.040315, Feat: 0.921824) | LR: 1.00e-04
+
+Iter [5/5] | Loss: 0.080503 (Rec: 0.035988, Feat: 0.890311) | LR: 1.00e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 26.9545 dB | Avg SSIM: 0.66031 | Feature Loss: 0.913223
+
+=== Training Session Finished ===
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet_sideinfo/train_MOT20_QP32_feature_loss.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+CUDA is unavailable; using CPU with AMP disabled.
+Overall loss configuration type: feature
+Initializing datasets...
+Using MOT20SideInfoDataset for train.
+Using MOT20SideInfoDataset for test.
+Initializing original one-channel NAFNet (side info is prepared but not consumed)...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP32_sideinfo_feature_loss
+No LR Scheduler active (or dry-run).
+Loading frozen YOLO model for feature loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO Feature Loss prepped successfully.
+Starting training: start_epoch=1, total_epochs=1, iterations_per_epoch=3572
+
+Iter [1/5] | Loss: 0.243338 (Rec: 0.192803, Feat: 1.010702) | LR: 1.00e-04
+
+Iter [2/5] | Loss: 0.335259 (Rec: 0.289534, Feat: 0.914508) | LR: 1.00e-04
+
+Iter [3/5] | Loss: 0.273595 (Rec: 0.228912, Feat: 0.893650) | LR: 1.00e-04
+
+Iter [4/5] | Loss: 0.223913 (Rec: 0.175789, Feat: 0.962474) | LR: 1.00e-04
+
+Iter [5/5] | Loss: 0.321526 (Rec: 0.281147, Feat: 0.807577) | LR: 1.00e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 12.0656 dB | Avg SSIM: 0.59710 | Feature Loss: 0.904156
+
+=== Training Session Finished ===

@@ -1,0 +1,31 @@
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet_p_r/train_MOT20_QP37_feature_loss.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+CUDA is unavailable; using CPU with AMP disabled.
+Overall loss configuration type: feature
+Initializing datasets...
+Using MOT20SideInfoDataset for train.
+Using MOT20SideInfoDataset for test.
+Initializing NAFNet with input_mode=prediction_residual, input_channels=3, output_channels=1...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP37_p_r_feature_loss
+No LR Scheduler active (or dry-run).
+Loading frozen YOLO model for feature loss from outputs/weights/best_yolo26x.pt...
+Frozen YOLO Feature Loss prepped successfully.
+Starting training: start_epoch=1, total_epochs=1, iterations_per_epoch=3572
+
+Iter [1/5] | Loss: 0.089747 (Rec: 0.044549, Feat: 0.903951) | LR: 1.00e-03
+
+Iter [2/5] | Loss: 0.068909 (Rec: 0.032093, Feat: 0.736334) | LR: 1.00e-03
+
+Iter [3/5] | Loss: 0.067897 (Rec: 0.032342, Feat: 0.711098) | LR: 1.00e-03
+
+Iter [4/5] | Loss: 0.055979 (Rec: 0.025396, Feat: 0.611658) | LR: 1.00e-03
+
+Iter [5/5] | Loss: 0.043456 (Rec: 0.016721, Feat: 0.534693) | LR: 1.00e-03
+
+Running validation loop...
+
+Validation | Avg PSNR: 31.4264 dB | Avg SSIM: 0.89447 | Feature Loss: 0.486695
+
+=== Training Session Finished ===

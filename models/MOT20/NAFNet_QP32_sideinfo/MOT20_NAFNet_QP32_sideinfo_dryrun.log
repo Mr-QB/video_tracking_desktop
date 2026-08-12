@@ -1,0 +1,87 @@
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet_sideinfo/train_MOT20_QP32.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+CUDA is unavailable; using CPU with AMP disabled.
+Overall loss configuration type: human
+Initializing datasets...
+Using MOT20SideInfoDataset for train.
+Using MOT20SideInfoDataset for test.
+Initializing attention-fused NAFNetSideInfo model...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP32_sideinfo
+No LR Scheduler active (or dry-run).
+Starting training: start_epoch=1, total_epochs=1, iterations_per_epoch=3572
+
+Iter [1/5] | Loss: 0.042343 (Rec: 0.042343) | LR: 1.00e-04
+
+Iter [2/5] | Loss: 0.043452 (Rec: 0.043452) | LR: 1.00e-04
+
+Iter [3/5] | Loss: 0.041182 (Rec: 0.041182) | LR: 1.00e-04
+
+Iter [4/5] | Loss: 0.040294 (Rec: 0.040294) | LR: 1.00e-04
+
+Iter [5/5] | Loss: 0.035352 (Rec: 0.035352) | LR: 1.00e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 26.9576 dB | Avg SSIM: 0.65862
+
+=== Training Session Finished ===
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet_sideinfo/train_MOT20_QP32.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+CUDA is unavailable; using CPU with AMP disabled.
+Overall loss configuration type: human
+Initializing datasets...
+Using MOT20SideInfoDataset for train.
+Using MOT20SideInfoDataset for test.
+Initializing original one-channel NAFNet (side info is prepared but not consumed)...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP32_sideinfo
+No LR Scheduler active (or dry-run).
+Starting training: start_epoch=1, total_epochs=1, iterations_per_epoch=3572
+
+Iter [1/5] | Loss: 0.192803 (Rec: 0.192803) | LR: 1.00e-04
+
+Iter [2/5] | Loss: 0.289062 (Rec: 0.289062) | LR: 1.00e-04
+
+Iter [3/5] | Loss: 0.228034 (Rec: 0.228034) | LR: 1.00e-04
+
+Iter [4/5] | Loss: 0.174489 (Rec: 0.174489) | LR: 1.00e-04
+
+Iter [5/5] | Loss: 0.279328 (Rec: 0.279328) | LR: 1.00e-04
+
+Running validation loop...
+
+Validation | Avg PSNR: 12.1147 dB | Avg SSIM: 0.56646
+
+=== Training Session Finished ===
+=== Starting Training Session ===
+Config path: configs/MOT20/nafnet_sideinfo/train_MOT20_QP32.yml
+Random seed set to: 7
+Mixed precision (AMP): True
+CUDA is unavailable; using CPU with AMP disabled.
+Overall loss configuration type: human
+Initializing datasets...
+Using MOT20SideInfoDataset for train.
+Using MOT20SideInfoDataset for test.
+Initializing original one-channel NAFNet (side info is prepared but not consumed)...
+Checkpoints and weights will be saved dynamically to: outputs/MOT20/NAFNet_QP32_sideinfo
+No LR Scheduler active (or dry-run).
+Starting training: start_epoch=1, total_epochs=1, iterations_per_epoch=3572
+
+Iter [1/5] | Loss: 0.192803 (Rec: 0.192803) | LR: 1.00e-03
+
+Iter [2/5] | Loss: 0.220429 (Rec: 0.220429) | LR: 1.00e-03
+
+Iter [3/5] | Loss: 0.109189 (Rec: 0.109189) | LR: 1.00e-03
+
+Iter [4/5] | Loss: 0.054280 (Rec: 0.054280) | LR: 1.00e-03
+
+Iter [5/5] | Loss: 0.083807 (Rec: 0.083807) | LR: 1.00e-03
+
+Running validation loop...
+
+Validation | Avg PSNR: 20.0308 dB | Avg SSIM: 0.52491
+
+=== Training Session Finished ===
