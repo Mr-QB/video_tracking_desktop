@@ -66,21 +66,49 @@ def get_cpu_name() -> str:
     _CPU_NAME_CACHE = proc if proc else "CPU"
     return _CPU_NAME_CACHE
 
+def get_jetson_model() -> str:
+    """Detect NVIDIA Jetson board model from device tree if available on Linux."""
+    try:
+        dt_model_path = Path("/proc/device-tree/model")
+        if dt_model_path.exists():
+            with open(dt_model_path, "r", encoding="utf-8", errors="ignore") as f:
+                model_str = f.read().strip().rstrip('\x00')
+                if model_str:
+                    return model_str
+    except Exception:
+        pass
+    return ""
+
 def get_gpu_name() -> str:
-    """Detect GPU device name dynamically using PyTorch."""
+    """Detect GPU device name dynamically using PyTorch & Jetson hardware info."""
     global _GPU_NAME_CACHE
     if _GPU_NAME_CACHE is not None:
         return _GPU_NAME_CACHE
     try:
         import torch
         if torch.cuda.is_available():
-            name = torch.cuda.get_device_name(0)
+            name = torch.cuda.get_device_name(0).strip()
+            
+            # Check Jetson device tree model first
+            jetson_model = get_jetson_model()
+            if jetson_model:
+                clean_jetson = jetson_model.replace("Developer Kit", "").replace("NVIDIA ", "").strip()
+                _GPU_NAME_CACHE = clean_jetson
+                return _GPU_NAME_CACHE
+            
+            # If PyTorch returns "Orin" or "Orin (nvgpu)", expand to "Jetson AGX Orin"
+            if name.lower() in ["orin", "orin (nvgpu)", "nvgpu"]:
+                name = "Jetson AGX Orin"
+            elif "orin" in name.lower() and "agx" not in name.lower():
+                name = name.replace("Orin", "Jetson AGX Orin").replace("orin", "Jetson AGX Orin")
+                
             if name:
                 _GPU_NAME_CACHE = name
                 return _GPU_NAME_CACHE
     except Exception:
         pass
     return ""
+
 
 def get_active_device_name(use_gpu: bool = None) -> str:
     """
