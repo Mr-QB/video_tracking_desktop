@@ -20,7 +20,7 @@ from ui.timeline_chart import TrackingComparisonChart
 from core.video_controller import VideoController
 from core.mock_data import get_failure_cases
 from core.metric_evaluator import evaluate_and_cache_metrics
-from core.config import APP_CONFIG, get_path
+from core.config import APP_CONFIG, get_path, get_active_device_name
 
 class SpinnerWidget(QWidget):
     def __init__(self, parent=None):
@@ -182,7 +182,8 @@ class MainWindow(QMainWindow):
 
         title_lbl = QLabel("Video Enhancement for Tracking Evaluation")
         title_lbl.setObjectName("MainTitle")
-        sub_lbl = QLabel("Quality restoration & tracking on Jetson AGX")
+        active_device_name = get_active_device_name()
+        sub_lbl = QLabel(f"Quality restoration & tracking on {active_device_name}")
         sub_lbl.setObjectName("SubTitle")
 
         title_col = QVBoxLayout()

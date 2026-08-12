@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QFrame
 from PySide6.QtCore import Qt
+from core.config import get_active_device_name
 
 class MetricCard(QWidget):
     """
@@ -105,18 +106,21 @@ class MetricGroup(QWidget):
 
 
 class MetricDashboard(QWidget):
+    """
+    Dashboard section combining VQ, TP, and RT metric groups
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(8)
+        layout.setSpacing(10)
         
-        # 1. Video Quality vs Original
+        # 1. Visual Quality (vs Original)
         vq_metrics = [
             {'id': 'psnr', 'label': 'PSNR (vs Orig)', 'val': '-', 'delta': '-', 'is_positive': True},
             {'id': 'ssim', 'label': 'SSIM (vs Orig)', 'val': '-', 'delta': '-', 'is_positive': True}
         ]
-        self.vq_group = MetricGroup("Video Quality (Comp vs Orig \u2192 Enh vs Orig)", vq_metrics)
+        self.vq_group = MetricGroup("Visual Quality (Comp \u2192 Enh)", vq_metrics)
         
         # 2. Tracking Performance
         tp_metrics = [
@@ -128,10 +132,11 @@ class MetricDashboard(QWidget):
         self.tp_group = MetricGroup("Tracking Performance", tp_metrics)
         
         # 3. Runtime / Deployment
+        device_name = get_active_device_name()
         rt_metrics = [
             {'id': 'fps', 'label': 'FPS (avg)', 'val': '21.4', 'delta': 'frames / sec', 'is_neutral': True},
             {'id': 'latency', 'label': 'Latency (avg)', 'val': '46.3', 'delta': 'ms / frame', 'is_neutral': True},
-            {'id': 'gpu', 'label': 'GPU Usage', 'val': '68%', 'delta': 'Jetson AGX Orin', 'is_neutral': True}
+            {'id': 'gpu', 'label': 'Device Usage', 'val': '68%', 'delta': device_name, 'is_neutral': True}
         ]
         self.rt_group = MetricGroup("Runtime / Deployment (Enhanced)", rt_metrics)
         
@@ -193,10 +198,13 @@ class MetricDashboard(QWidget):
         else:
             self.vq_group.update_card('ssim', f"{comp_ssim} \u2192 {enh_ssim}", "index", is_positive=True, is_neutral=True)
 
-    def update_runtime_metrics(self, fps, latency, gpu_usage="68%"):
+    def update_runtime_metrics(self, fps, latency, device_usage="68%", device_name=None):
         def _fmt(val):
             return f"{val:.1f}" if isinstance(val, float) else str(val)
             
+        if device_name is None:
+            device_name = get_active_device_name()
+            
         self.rt_group.update_card('fps', _fmt(fps), "frames / sec", is_positive=True, is_neutral=True)
         self.rt_group.update_card('latency', _fmt(latency), "ms / frame", is_positive=True, is_neutral=True)
-        self.rt_group.update_card('gpu', gpu_usage, "Jetson AGX Orin", is_positive=True, is_neutral=True)
+        self.rt_group.update_card('gpu', device_usage, device_name, is_positive=True, is_neutral=True)
