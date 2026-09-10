@@ -7,6 +7,7 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPainter, QColor, QPen
 import sys
 import os
+import re
 from pathlib import Path
 
 # Ensure project root is in sys.path when running main_window.py directly
@@ -250,6 +251,12 @@ class MainWindow(QMainWindow):
             for d in os.listdir(dataset_dir):
                 if os.path.isdir(os.path.join(dataset_dir, d)) and d != "original":
                     codecs.append(d)
+        # os.listdir() order is filesystem-dependent; sort QP/bitrate numerically.
+        def _codec_sort_key(name):
+            match = re.search(r"(\d+)", name)
+            return (int(match.group(1)) if match else float("inf"), name.lower())
+
+        codecs.sort(key=_codec_sort_key)
         if not codecs:
             codecs = ["QP51"]
 
@@ -582,19 +589,17 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'tracking_chart'):
             self.tracking_chart.clear_chart()
 
-        # 1. Evaluate/load metrics
-        eval_base = str(get_path("eval_results_dir", "eval_results"))
-        
-        # Path: eval_results / <Codec_or_Algo> / <Sequence>
-        comp_dir = os.path.join(eval_base, codec_name, seq_name)
-        
-        if algo_name == "original":
-            enh_dir = os.path.join(eval_base, "original", seq_name)
-        else:
-            enh_dir = os.path.join(eval_base, f"NAFNet_{codec_name}_{algo_name}", seq_name)
-            
-        base_metrics = evaluate_and_cache_metrics(comp_dir, codec_name, is_baseline=True, seq_name=seq_name, codec_name=codec_name)
-        enh_metrics = evaluate_and_cache_metrics(enh_dir, algo_name, is_baseline=False, seq_name=seq_name, codec_name=codec_name)
+        # 1. Offline metrics come from eval_results. Realtime metrics are
+        # calculated from the tracks collected by VideoController instead.
+        base_metrics = enh_metrics = None
+        if not getattr(self.video_controller, "is_realtime_mode", False):
+            eval_base = str(get_path("eval_results_dir", "eval_results"))
+            comp_dir = os.path.join(eval_base, codec_name, seq_name)
+            enh_dir = (os.path.join(eval_base, "original", seq_name)
+                       if algo_name == "original" else
+                       os.path.join(eval_base, f"NAFNet_{codec_name}_{algo_name}", seq_name))
+            base_metrics = evaluate_and_cache_metrics(comp_dir, codec_name, is_baseline=True, seq_name=seq_name, codec_name=codec_name)
+            enh_metrics = evaluate_and_cache_metrics(enh_dir, algo_name, is_baseline=False, seq_name=seq_name, codec_name=codec_name)
         
         # 2. Update UI metric cards
         if getattr(self.video_controller, 'is_realtime_mode', False):
