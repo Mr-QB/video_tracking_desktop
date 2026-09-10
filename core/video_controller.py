@@ -504,7 +504,8 @@ class VideoController(QObject):
                 self.realtime_comp_tracks[frame_idx] = c_tracks
                 self.realtime_enh_tracks[frame_idx] = e_tracks
                 
-                m_worker = MetricsWorker(o_img_bgr, c_img_rgb, e_img_bgr, c_tracks, e_tracks, latency_ms)
+                c_img_bgr = cv2.cvtColor(c_img_rgb, cv2.COLOR_RGB2BGR)  # restore BGR for metric computation
+                m_worker = MetricsWorker(o_img_bgr, c_img_bgr, e_img_bgr, c_tracks, e_tracks, latency_ms)
                 m_worker.signals.metrics_computed.connect(self._on_metrics_computed)
                 self.threadpool.start(m_worker)
                 
