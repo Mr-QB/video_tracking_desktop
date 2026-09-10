@@ -18,7 +18,6 @@ from ui.video_panel import VideoCanvas
 from ui.metric_cards import MetricDashboard
 from ui.timeline_chart import TrackingComparisonChart
 from core.video_controller import VideoController
-from core.mock_data import get_failure_cases
 from core.metric_evaluator import evaluate_and_cache_metrics
 from core.config import APP_CONFIG, get_path, get_active_device_name
 
@@ -108,6 +107,7 @@ class MainWindow(QMainWindow):
         self.video_controller.playback_finished.connect(self.on_playback_finished)
         self.video_controller.models_loading_started.connect(self.on_models_loading_started)
         self.video_controller.models_loaded.connect(self.on_models_loaded)
+        self.video_controller.models_load_failed.connect(self.on_models_load_failed)
 
         self._init_ui()
 
@@ -321,7 +321,7 @@ class MainWindow(QMainWindow):
         comp_header.setContentsMargins(0, 0, 0, 0)
         comp_title = QLabel("Compressed Video")
         comp_title.setObjectName("VideoPanelTitle")
-        comp_badge = QLabel("H.264 · 1.2 Mbps")
+        comp_badge = QLabel("Input")
         comp_badge.setObjectName("CompressedBadge")
         comp_header.addWidget(comp_title)
         comp_header.addStretch()
@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
         enh_header.setContentsMargins(0, 0, 0, 0)
         enh_title = QLabel("Enhanced Video")
         enh_title.setObjectName("VideoPanelTitle")
-        enh_badge = QLabel("Enhanced ×2")
+        enh_badge = QLabel("Model output")
         enh_badge.setObjectName("EnhancedBadge")
         enh_header.addWidget(enh_title)
         enh_header.addStretch()
@@ -465,6 +465,8 @@ class MainWindow(QMainWindow):
             self.tracking_chart.clear_chart()
         else:
             self.video_controller.stop()
+            self.metric_dashboard.update_quality_metrics("N/A", "N/A", "N/A", "N/A")
+            self.metric_dashboard.update_runtime_metrics("N/A", "N/A")
             self._update_all_metrics()
             
         seq_name = self.seq_cb.currentText() if hasattr(self, 'seq_cb') and self.seq_cb else "MOT20-01"
@@ -493,6 +495,12 @@ class MainWindow(QMainWindow):
             if hasattr(self, 'play_btn'):
                 self.play_btn.setChecked(True)
                 self.play_btn.setText("❚❚")
+
+    def on_models_load_failed(self, error):
+        if hasattr(self, 'loading_dialog') and self.loading_dialog:
+            self.loading_dialog.close()
+            self.loading_dialog = None
+        QMessageBox.critical(self, "YOLO unavailable", f"Realtime Benchmark was not started.\n\n{error}")
 
     def on_realtime_metrics_updated(self, comp_psnr, enh_psnr, comp_ssim, enh_ssim, fps, latency):
         self.metric_dashboard.update_quality_metrics(comp_psnr, enh_psnr, comp_ssim, enh_ssim)
@@ -529,11 +537,6 @@ class MainWindow(QMainWindow):
         self.metric_dashboard.update_tracking_metrics(comp_metrics, enh_metrics)
         self.tracking_chart.update_bar_chart(comp_metrics, enh_metrics)
         
-        # Quality metrics vs Original for offline: Comp vs Orig -> Enh vs Orig
-        if not getattr(self.video_controller, 'is_realtime_mode', False):
-            self.metric_dashboard.update_quality_metrics(28.4, 35.2, 0.865, 0.965)
-            self.metric_dashboard.update_runtime_metrics(21.4, 46.3)
-
     def toggle_play(self):
         self.video_controller.toggle_play_pause()
         self.play_btn.setText("||" if self.video_controller.is_playing else "▶")
@@ -588,19 +591,7 @@ class MainWindow(QMainWindow):
         if algo_name == "original":
             enh_dir = os.path.join(eval_base, "original", seq_name)
         else:
-            candidates = [
-                os.path.join(eval_base, f"NAFNet_{codec_name}_{algo_name}", seq_name),
-                os.path.join(eval_base, f"NAFNet_{algo_name}", seq_name),
-                os.path.join(eval_base, algo_name, seq_name)
-            ]
-            enh_dir = next((c for c in candidates if os.path.exists(c)), os.path.join(eval_base, algo_name, seq_name))
-        
-        # If codec directory doesn't exist in eval_results, fallback to mock "Compressed"
-        if not os.path.exists(comp_dir):
-            comp_dir = os.path.join(eval_base, "Compressed", seq_name)
-            if not os.path.exists(comp_dir):
-                # Fallback to root level if seq doesn't exist
-                comp_dir = os.path.join(eval_base, "Compressed")
+            enh_dir = os.path.join(eval_base, f"NAFNet_{codec_name}_{algo_name}", seq_name)
             
         base_metrics = evaluate_and_cache_metrics(comp_dir, codec_name, is_baseline=True, seq_name=seq_name, codec_name=codec_name)
         enh_metrics = evaluate_and_cache_metrics(enh_dir, algo_name, is_baseline=False, seq_name=seq_name, codec_name=codec_name)
@@ -614,8 +605,8 @@ class MainWindow(QMainWindow):
             self.tracking_chart.clear_chart()
         else:
             self.metric_dashboard.update_tracking_metrics(base_metrics, enh_metrics)
-            self.metric_dashboard.update_quality_metrics(28.4, 35.2, 0.865, 0.965)
-            self.metric_dashboard.update_runtime_metrics(21.4, 46.3)
+            self.metric_dashboard.update_quality_metrics("N/A", "N/A", "N/A", "N/A")
+            self.metric_dashboard.update_runtime_metrics("N/A", "N/A")
             self.tracking_chart.update_bar_chart(base_metrics, enh_metrics)
         
         # 3. Reload tracking data and images in controller

@@ -19,33 +19,6 @@ if trackeval_path not in sys.path:
 
 import trackeval
 
-QP_BASE_METRICS = {
-    "QP51": {"HOTA": 50.2, "IDF1": 55.4, "MOTA": 47.1, "ID_Switches": 210, "False_Negatives": 1420, "Recall": 62.5, "Precision": 71.0},
-    "QP47": {"HOTA": 54.1, "IDF1": 59.8, "MOTA": 51.5, "ID_Switches": 185, "False_Negatives": 1310, "Recall": 66.8, "Precision": 75.4},
-    "QP42": {"HOTA": 58.6, "IDF1": 63.7, "MOTA": 56.0, "ID_Switches": 160, "False_Negatives": 1180, "Recall": 71.2, "Precision": 79.8},
-    "QP37": {"HOTA": 63.4, "IDF1": 68.2, "MOTA": 61.3, "ID_Switches": 135, "False_Negatives": 1050, "Recall": 76.5, "Precision": 84.2},
-    "QP32": {"HOTA": 68.9, "IDF1": 73.5, "MOTA": 66.8, "ID_Switches": 110, "False_Negatives": 910,  "Recall": 81.9, "Precision": 88.6},
-    "QP22": {"HOTA": 75.2, "IDF1": 79.8, "MOTA": 73.4, "ID_Switches": 80,  "False_Negatives": 720,  "Recall": 87.4, "Precision": 93.1},
-}
-
-METHOD_BOOST = {
-    "original": 0.0,
-    "sideinfo": 2.4,
-    "feature_loss": 4.1,
-    "p_r": 4.8,
-    "perception": 5.5,
-    "sideinfo_feature_loss": 6.3,
-    "p_r_feature_loss": 7.2,
-    "combined": 8.6
-}
-
-SEQ_OFFSET = {
-    "MOT20-01": 0.0,
-    "MOT20-02": -2.1,
-    "MOT20-03": 1.4,
-    "MOT20-05": -1.2
-}
-
 def calculate_official_trackeval_metrics(gt_file, track_file_or_df):
     """
     Evaluates tracking performance using Jonathon Luiten's official TrackEval package:
@@ -142,37 +115,9 @@ def calculate_official_trackeval_metrics(gt_file, track_file_or_df):
         print(f"[WARN] Error in Jonathon Luiten TrackEval: {e}")
         return None
 
-def compute_dynamic_qp_metrics(codec_name, algo_name, seq_name="MOT20-01", is_baseline=False):
-    qp_key = codec_name.upper() if codec_name.upper() in QP_BASE_METRICS else "QP37"
-    base = QP_BASE_METRICS[qp_key]
-    
-    clean_method = algo_name.replace("NAFNet_", "").replace("NAFNet ", "").strip()
-    boost = 0.0 if is_baseline else METHOD_BOOST.get(clean_method, 4.0)
-    seq_off = SEQ_OFFSET.get(seq_name, 0.0)
-    
-    hota = round(min(98.0, base["HOTA"] + boost + seq_off), 1)
-    idf1 = round(min(98.0, base["IDF1"] + boost * 1.1 + seq_off), 1)
-    mota = round(min(98.0, base["MOTA"] + boost * 0.9 + seq_off), 1)
-    
-    switches = max(10, int(base["ID_Switches"] * (1.0 - (boost * 0.05))))
-    misses = max(50, int(base["False_Negatives"] * (1.0 - (boost * 0.06))))
-    recall = round(min(99.0, base["Recall"] + boost * 0.8), 1)
-    precision = round(min(99.0, base["Precision"] + boost * 0.7), 1)
-    
-    return {
-        'HOTA': hota,
-        'IDF1': idf1,
-        'MOTA': mota,
-        'ID_Switches': switches,
-        'False_Negatives': misses,
-        'Recall': recall,
-        'Precision': precision
-    }
-
 def evaluate_and_cache_metrics(method_dir, method_name, is_baseline=False, seq_name="MOT20-01", codec_name="QP37"):
     dataset_dir = get_path("dataset_images_dir", "dataset/test")
     gt_file = dataset_dir / "original" / seq_name / "gt" / "gt.txt"
-    eval_base = get_path("eval_results_dir", "eval_results")
     
     target_track_filename = "comp_tracks.txt" if is_baseline else "enh_tracks.txt"
     
@@ -180,7 +125,6 @@ def evaluate_and_cache_metrics(method_dir, method_name, is_baseline=False, seq_n
     json_candidates = [
         os.path.join(method_dir, "metrics.json"),
         os.path.join(method_dir, seq_name, "metrics.json"),
-        os.path.join(eval_base, codec_name, seq_name, "metrics.json") if is_baseline else os.path.join(eval_base, f"NAFNet_{codec_name}", seq_name, "metrics.json")
     ]
     for j_path in json_candidates:
         if os.path.exists(j_path):
@@ -197,20 +141,6 @@ def evaluate_and_cache_metrics(method_dir, method_name, is_baseline=False, seq_n
         os.path.join(method_dir, target_track_filename),
         os.path.join(method_dir, seq_name, target_track_filename)
     ]
-    if is_baseline:
-        track_candidates.extend([
-            os.path.join(eval_base, codec_name, seq_name, target_track_filename),
-            os.path.join(eval_base, codec_name, target_track_filename),
-            os.path.join(eval_base, "Compressed", seq_name, target_track_filename),
-        ])
-    else:
-        track_candidates.extend([
-            os.path.join(eval_base, f"NAFNet_{codec_name}_{method_name}", seq_name, target_track_filename),
-            os.path.join(eval_base, f"NAFNet_{codec_name}", seq_name, target_track_filename),
-            os.path.join(eval_base, f"NAFNet_{method_name}", seq_name, target_track_filename),
-            os.path.join(eval_base, method_name, seq_name, target_track_filename),
-            os.path.join(eval_base, "original", seq_name, target_track_filename),
-        ])
 
     track_file = next((p for p in track_candidates if os.path.exists(p)), None)
     
@@ -225,5 +155,5 @@ def evaluate_and_cache_metrics(method_dir, method_name, is_baseline=False, seq_n
                 pass
             return official_metrics
             
-    return compute_dynamic_qp_metrics(codec_name, method_name, seq_name, is_baseline)
-
+    print(f"[WARN] No verified tracking metrics available for {method_name} ({seq_name}).")
+    return None

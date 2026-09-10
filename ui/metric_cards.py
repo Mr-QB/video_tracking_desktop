@@ -134,9 +134,9 @@ class MetricDashboard(QWidget):
         # 3. Runtime / Deployment
         device_name = get_active_device_name()
         rt_metrics = [
-            {'id': 'fps', 'label': 'FPS (avg)', 'val': '21.4', 'delta': 'frames / sec', 'is_neutral': True},
-            {'id': 'latency', 'label': 'Latency (avg)', 'val': '46.3', 'delta': 'ms / frame', 'is_neutral': True},
-            {'id': 'gpu', 'label': 'Device Usage', 'val': '68%', 'delta': device_name, 'is_neutral': True}
+            {'id': 'fps', 'label': 'FPS (avg)', 'val': 'N/A', 'delta': 'No measurement', 'is_neutral': True},
+            {'id': 'latency', 'label': 'Latency (avg)', 'val': 'N/A', 'delta': 'No measurement', 'is_neutral': True},
+            {'id': 'gpu', 'label': 'Device Usage', 'val': 'N/A', 'delta': device_name, 'is_neutral': True}
         ]
         self.rt_group = MetricGroup("Runtime / Deployment (Enhanced)", rt_metrics)
         
@@ -146,6 +146,8 @@ class MetricDashboard(QWidget):
 
     def update_tracking_metrics(self, base_metrics, enh_metrics):
         if not base_metrics or not enh_metrics:
+            for metric_id in self.tp_group.cards:
+                self.tp_group.update_card(metric_id, 'N/A', 'No verified tracking output', is_positive=True, is_neutral=True)
             return
             
         def _fmt(val):
@@ -198,7 +200,7 @@ class MetricDashboard(QWidget):
         else:
             self.vq_group.update_card('ssim', f"{comp_ssim} \u2192 {enh_ssim}", "index", is_positive=True, is_neutral=True)
 
-    def update_runtime_metrics(self, fps, latency, device_usage="68%", device_name=None):
+    def update_runtime_metrics(self, fps, latency, device_usage="N/A", device_name=None):
         def _fmt(val):
             return f"{val:.1f}" if isinstance(val, float) else str(val)
             

@@ -5,7 +5,6 @@ import queue
 from pathlib import Path
 from PySide6.QtCore import QObject, Signal, QTimer, QThread, QRunnable, QThreadPool
 
-from core.mock_data import TOTAL_FRAMES, get_tracking_data_for_frame
 from core.tracking_parser import parse_mot_tracking_file
 
 class WorkerSignals(QObject):
@@ -13,7 +12,7 @@ class WorkerSignals(QObject):
 
 def compute_ssim_fast(img1, img2):
     if img1 is None or img2 is None:
-        return 0.85
+        raise ValueError("SSIM requires two images")
     if img1.shape != img2.shape:
         img2 = cv2.resize(img2, (img1.shape[1], img1.shape[0]))
     
@@ -54,16 +53,13 @@ class MetricsWorker(QRunnable):
         self.latency_ms = latency_ms
 
     def run(self):
-        comp_psnr, enh_psnr = 28.5, 34.8
-        comp_ssim, enh_ssim = 0.865, 0.942
-        
-        if self.orig_img is not None:
-            if self.comp_img is not None:
-                comp_psnr = cv2.PSNR(self.orig_img, self.comp_img)
-                comp_ssim = compute_ssim_fast(self.orig_img, self.comp_img)
-            if self.enh_img is not None:
-                enh_psnr = cv2.PSNR(self.orig_img, self.enh_img)
-                enh_ssim = compute_ssim_fast(self.orig_img, self.enh_img)
+        if self.orig_img is None or self.comp_img is None or self.enh_img is None:
+            return
+
+        comp_psnr = cv2.PSNR(self.orig_img, self.comp_img)
+        enh_psnr = cv2.PSNR(self.orig_img, self.enh_img)
+        comp_ssim = compute_ssim_fast(self.orig_img, self.comp_img)
+        enh_ssim = compute_ssim_fast(self.orig_img, self.enh_img)
                 
         c_conf = sum(t.get('conf', 0) for t in self.comp_tracks) / len(self.comp_tracks) if self.comp_tracks else 0
         e_conf = sum(t.get('conf', 0) for t in self.enh_tracks) / len(self.enh_tracks) if self.enh_tracks else 0
@@ -75,6 +71,7 @@ class MetricsWorker(QRunnable):
 
 class ModelLoaderThread(QThread):
     finished = Signal(object, object)
+    failed = Signal(str)
     
     def run(self):
         try:
@@ -105,6 +102,7 @@ class ModelLoaderThread(QThread):
             self.finished.emit(yolo_comp, yolo_enh)
         except Exception as e:
             print(f"[WARN] Failed to load YOLO models: {e}")
+            self.failed.emit(str(e))
             self.finished.emit(None, None)
 
 class PrefetchWorker(QThread):
@@ -312,13 +310,14 @@ class VideoController(QObject):
     realtime_chart_updated = Signal(int, float, float)
     models_loading_started = Signal()
     models_loaded = Signal()
+    models_load_failed = Signal(str)
 
     def __init__(self, compressed_path=None, enhanced_path=None):
         super().__init__()
         self.threadpool = QThreadPool()
         
         self.current_frame = 0
-        self.total_frames = TOTAL_FRAMES
+        self.total_frames = 0
         self.is_playing = False
         
         self.is_realtime_mode = False
@@ -351,6 +350,7 @@ class VideoController(QObject):
                 self.models_loading_started.emit()
                 self._loader_thread = ModelLoaderThread()
                 self._loader_thread.finished.connect(self._on_models_loaded)
+                self._loader_thread.failed.connect(self.models_load_failed)
                 self._loader_thread.start()
             else:
                 self._restart_worker()
@@ -361,6 +361,8 @@ class VideoController(QObject):
             self._rt_last_emit_time = time.time()
 
     def _on_models_loaded(self, yolo_comp, yolo_enh):
+        if yolo_comp is None or yolo_enh is None:
+            return
         self.yolo_comp = yolo_comp
         self.yolo_enh = yolo_enh
         self._restart_worker()
@@ -420,27 +422,11 @@ class VideoController(QObject):
             else:
                 self.total_frames = 0
                 
-        comp_candidates = [
-            self.eval_base / codec_name / seq_name / "comp_tracks.txt",
-            self.eval_base / codec_name / "comp_tracks.txt",
-            self.eval_base / "Compressed" / seq_name / "comp_tracks.txt",
-            self.eval_base / "Compressed" / "comp_tracks.txt",
-            self.eval_base / "comp_tracks.txt",
-            self.eval_base.parent / "comp_tracks.txt",
-            self.eval_base.parent / "yolo_tracker" / "comp_tracks.txt",
-        ]
-        comp_track_path = next((p for p in comp_candidates if p.exists()), self.eval_base / "Compressed" / "comp_tracks.txt")
+        comp_track_path = self.eval_base / codec_name / seq_name / "comp_tracks.txt"
         self.comp_tracks_data = parse_mot_tracking_file(str(comp_track_path), frame_offset=-1)
 
-        enh_candidates = [
-            self.eval_base / algo_name / seq_name / "enh_tracks.txt" if algo_name != "original" else self.eval_base / "original" / seq_name / "enh_tracks.txt",
-            self.eval_base / algo_name / "enh_tracks.txt",
-            self.eval_base / "Compressed" / seq_name / "enh_tracks.txt",
-            self.eval_base / "enh_tracks.txt",
-            self.eval_base.parent / "enh_tracks.txt",
-            self.eval_base.parent / "yolo_tracker" / "enh_tracks.txt",
-        ]
-        enh_track_path = next((p for p in enh_candidates if p.exists()), self.eval_base / algo_name / "enh_tracks.txt")
+        enh_dir = "original" if algo_name == "original" else f"NAFNet_{codec_name}_{algo_name}"
+        enh_track_path = self.eval_base / enh_dir / seq_name / "enh_tracks.txt"
         self.enh_tracks_data = parse_mot_tracking_file(str(enh_track_path), frame_offset=-1)
         
         self.current_frame = 0
@@ -520,22 +506,16 @@ class VideoController(QObject):
     def evaluate_realtime_metrics(self, is_baseline=False):
         tracks_source = self.realtime_comp_tracks if is_baseline else self.realtime_enh_tracks
         if not tracks_source:
-            eval_dir = os.path.join(self.eval_base, self.current_codec if is_baseline else self.current_enhancement, self.current_seq)
-            from core.metric_evaluator import evaluate_and_cache_metrics
-            return evaluate_and_cache_metrics(
-                eval_dir,
-                self.current_codec if is_baseline else self.current_enhancement,
-                is_baseline=is_baseline,
-                seq_name=self.current_seq,
-                codec_name=self.current_codec
-            )
+            print("[WARN] No realtime frames were processed; tracking metrics are unavailable.")
+            return None
             
         import pandas as pd
-        from core.metric_evaluator import calculate_official_trackeval_metrics, compute_dynamic_qp_metrics
+        from core.metric_evaluator import calculate_official_trackeval_metrics
         
         gt_file = self.dataset_dir / "original" / self.current_seq / "gt" / "gt.txt"
         if not gt_file.exists():
-            return compute_dynamic_qp_metrics(self.current_codec, self.current_enhancement, self.current_seq, is_baseline)
+            print(f"[WARN] Ground-truth file not found: {gt_file}")
+            return None
 
         rows = []
         for frame_idx in sorted(tracks_source.keys()):
@@ -549,13 +529,14 @@ class VideoController(QObject):
                 rows.append([frame_num, tr_id, bbox[0], bbox[1], bbox[2], bbox[3], conf, -1, -1, -1])
                 
         if not rows:
-            return compute_dynamic_qp_metrics(self.current_codec, self.current_enhancement, self.current_seq, is_baseline)
+            print("[WARN] No verified realtime detections available for metric evaluation.")
+            return None
             
         df_ts = pd.DataFrame(rows)
         res = calculate_official_trackeval_metrics(str(gt_file), df_ts)
         if res:
             return res
-        return compute_dynamic_qp_metrics(self.current_codec, self.current_enhancement, self.current_seq, is_baseline)
+        return None
 
     def next_frame(self):
         self.process_queue()
@@ -566,11 +547,6 @@ class VideoController(QObject):
 
     def update_frame_display(self):
         if self.total_frames == 0:
-            comp_img = self._get_mock_frame(self.current_frame, False)
-            enh_img = self._get_mock_frame(self.current_frame, True)
-            comp_tracks = get_tracking_data_for_frame(self.current_frame, is_enhanced=False)
-            enh_tracks = get_tracking_data_for_frame(self.current_frame, is_enhanced=True)
-            self.frame_updated.emit(self.current_frame, comp_img, comp_tracks, enh_img, enh_tracks)
             return
 
         if not self.is_playing and self.worker:
@@ -602,16 +578,13 @@ class VideoController(QObject):
             avg_c_ssim = sum(x[2] for x in self._rt_buffer) / len(self._rt_buffer)
             avg_e_ssim = sum(x[3] for x in self._rt_buffer) / len(self._rt_buffer)
             avg_lat = sum(x[4] for x in self._rt_buffer) / len(self._rt_buffer)
-            fps = 1000.0 / avg_lat if avg_lat > 0 else 30.0
+            if avg_lat <= 0:
+                return
+            fps = 1000.0 / avg_lat
             
             self.realtime_metrics_updated.emit(avg_c_psnr, avg_e_psnr, avg_c_ssim, avg_e_ssim, fps, avg_lat)
             self._rt_buffer.clear()
             self._rt_last_emit_time = now
-
-    def _get_mock_frame(self, frame_idx, is_enhanced):
-        img = np.ones((720, 1280, 3), dtype=np.uint8) * 240
-        cv2.putText(img, "No Data", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (150, 150, 150), 2)
-        return img
 
     def cleanup(self):
         self._stop_worker()

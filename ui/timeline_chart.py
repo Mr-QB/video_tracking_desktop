@@ -4,8 +4,6 @@ from PySide6.QtCore import Signal, Qt
 from PySide6.QtGui import QFont
 import numpy as np
 
-from core.mock_data import generate_timeline_data, EVENTS
-
 class TrackingComparisonChart(QWidget):
     """
     Side-by-side dual-panel bar+line chart showing tracking metrics
@@ -108,16 +106,13 @@ class TrackingComparisonChart(QWidget):
         """Update bar chart with new metrics dicts."""
         self.clear_bar_chart()
         
-        # Extract metrics, fallback to 0
+        if not comp_metrics or not enh_metrics:
+            return
+
+        # Only plot values calculated by TrackEval.
         def get_vals(m):
-            if not m: return [0, 0, 0, 0, 0]
-            # Mock MOTA, Recall, Prec if not in dict
             return [
-                m.get('HOTA', 0),
-                m.get('IDF1', 0),
-                m.get('MOTA', m.get('HOTA', 0) - 5),
-                m.get('Recall', 75.0),
-                m.get('Precision', 80.0)
+                m['HOTA'], m['IDF1'], m['MOTA'], m['Recall'], m['Precision']
             ]
             
         comp_vals = get_vals(comp_metrics)
@@ -174,31 +169,26 @@ class TrackingComparisonChart(QWidget):
         comp_tracks_data: dict {frame_idx: [track1, track2, ...]}
         enh_tracks_data: dict {frame_idx: [track1, track2, ...]}
         """
-        max_frame = 0
-        if comp_tracks_data:
-            max_frame = max(comp_tracks_data.keys())
-        if enh_tracks_data:
-            max_frame = max(max_frame, max(enh_tracks_data.keys()))
-            
-        if max_frame == 0:
+        frame_keys = set(comp_tracks_data) | set(enh_tracks_data)
+        if not frame_keys:
             self.clear_chart()
             return
-            
-        frames = np.arange(1, max_frame + 1)
-        comp_conf = np.zeros(max_frame)
-        enh_conf = np.zeros(max_frame)
+        max_frame = max(frame_keys)
+        frames = np.arange(max_frame + 1)
+        comp_conf = np.zeros(max_frame + 1)
+        enh_conf = np.zeros(max_frame + 1)
         
-        for f in range(1, max_frame + 1):
+        for f in range(max_frame + 1):
             c_tracks = comp_tracks_data.get(f, [])
             if c_tracks:
                 # conf is in the dictionary 'conf'
                 c_conf = sum([t.get('conf', 0) for t in c_tracks]) / len(c_tracks)
-                comp_conf[f - 1] = c_conf * 100 if c_conf <= 1.0 else c_conf
+                comp_conf[f] = c_conf * 100 if c_conf <= 1.0 else c_conf
             
             e_tracks = enh_tracks_data.get(f, [])
             if e_tracks:
                 e_conf = sum([t.get('conf', 0) for t in e_tracks]) / len(e_tracks)
-                enh_conf[f - 1] = e_conf * 100 if e_conf <= 1.0 else e_conf
+                enh_conf[f] = e_conf * 100 if e_conf <= 1.0 else e_conf
             
         self.comp_curve.setData(frames, comp_conf)
         self.enh_curve.setData(frames, enh_conf)
