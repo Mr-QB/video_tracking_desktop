@@ -1,7 +1,7 @@
 # Data and evaluation results
 dataset/*
 eval_results/*
-# models/*
+# Large model weights are stored with Git LFS.
 
 # Python cache
 **/__pycache__/
